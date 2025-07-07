@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff registration</title>
+</head>
+<body>
+<h1>Staff registration</h1>
+<h4>Here is your credential to login for the platform.</h4>
+<span><b>Username: <p th:text="${staff.getUsername()}"></p></b></span>
+<span><b>Password: 12345678 </b>, Please change this after your login </span>
+<span>Thank you once again for registering in our application,
+<p th:text="${staff.getFullname()}">Pleasant having you here.</span>
+</body>
+</html>
