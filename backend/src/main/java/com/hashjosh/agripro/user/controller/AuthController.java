@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,54 +29,74 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
     private final UserService userService;
 
     public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
                           UserRepository userRepository, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
         this.userService = userService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/web/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequest,
                                    HttpServletRequest request, HttpServletResponse response) {
 
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.username(),
-                            loginRequest.password()
-                    )
-            );
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.username(),
+                        loginRequest.password()
+                )
+        );
 
-            CustomUserDetails userDetails  = (CustomUserDetails) authentication.getPrincipal();
-            User user = userDetails.getUser();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
+
+        if (user.getStaffProfile() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Staff not found!"));
+        }
+
+        boolean rememberMe = loginRequest.remember();  // From request JSON
+        int expiry = rememberMe ? 60 * 60 * 24 * 30 : -1;
+        String role = "ROLE_" + user.getStaffProfile()
+                                    .getRole()
+                                    .toUpperCase()
+                                    .replace(" ", "_");
+
+        String jwt = jwtUtil.generateToken(user.getUsername(), role);
+
+        // Set JWT as HttpOnly cookie for browser-based web frontend
+        Cookie jwtCookie = new Cookie("jwt", jwt);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(false); // Set to true in production with HTTPS
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(expiry);
+        jwtCookie.setAttribute("SameSite", "Lax");
+        response.addCookie(jwtCookie);
+        return ResponseEntity.ok(Map.of("message", "Login successful"));
+
+    }
+
+    @PostMapping("/mobile/login")
+    public ResponseEntity<?> loginMobile(@RequestBody @Valid LoginRequestDTO loginRequest,
+                                         HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.username(),
+                        loginRequest.password()
+                )
+        );
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userDetails.getUser();
 
 
-            String jwt = jwtUtil.generateToken(user);
-            boolean rememberMe = loginRequest.remember();  // From request JSON
-            int expiry = rememberMe ? 60 * 60 * 24 * 30 : -1;
+        boolean rememberMe = loginRequest.remember();
+        int expiry = rememberMe ? 60 * 60 * 24 * 30 : -1;
 
-            String clientHeader = request.getHeader("X-Client");
-            boolean isMobileApp = "mobile".equalsIgnoreCase(clientHeader);
+        String jwt = jwtUtil.generateToken(user.getUsername(), "ROLE_FARMER");
 
-            if (isMobileApp) {
-                // Return JWT token in body for mobile app to store
-                return ResponseEntity.ok(Map.of("token", jwt, "message", "Login successful"));
-            } else {
-                // Set JWT as HttpOnly cookie for browser-based web frontend
-                Cookie jwtCookie = new Cookie("jwt", jwt);
-                jwtCookie.setHttpOnly(true);
-                jwtCookie.setSecure(false); // Set to true in production with HTTPS
-                jwtCookie.setPath("/");
-                jwtCookie.setMaxAge(expiry);
-                jwtCookie.setAttribute("SameSite", "Lax");
-                response.addCookie(jwtCookie);
-                return ResponseEntity.ok(Map.of("message", "Login successful"));
-            }
-
+        return ResponseEntity.ok(Map.of("message", "Login successful", "jwt", jwt));
     }
 
     @GetMapping("/token")
@@ -89,7 +110,7 @@ public class AuthController {
         CustomUserDetails  userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
 
-        String jwt = jwtUtil.generateToken(user);
+        String jwt = jwtUtil.generateToken(user.getUsername(), "ROLE_FARMER");
 
 
         return ResponseEntity.ok(Map.of("token", jwt));

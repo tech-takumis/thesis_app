@@ -13,15 +13,9 @@ import com.hashjosh.agripro.user.repository.FarmerProfileRepository;
 import com.hashjosh.agripro.user.repository.StaffProfileRepository;
 import com.hashjosh.agripro.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 public class UserService {

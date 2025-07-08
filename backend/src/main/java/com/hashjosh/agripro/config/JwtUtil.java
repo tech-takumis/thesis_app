@@ -29,17 +29,13 @@ public class JwtUtil {
     }
 
 
-    public String generateToken(User user) {
+    public String generateToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("role", "ROLE_" + user.getRole().toUpperCase());
-
-        if("STAFF".equals(user.getRole()) && user.getStaffProfile() != null){
-            claims.put("staffRole", "ROLE_STAFF_"+ user.getStaffProfile().getSubROle().toUpperCase());
-        }
+        claims.put("role", role);
 
         return  Jwts.builder()
-                .subject(user.getUsername())
+                .subject(username)
                 .issuedAt(new Date())
                 .claims(claims)
                 .expiration(new Date(System.currentTimeMillis() + expirationTimeMs))

@@ -22,7 +22,6 @@ public class User {
     private String username;
     private String password;
     private String fullname;
-    private String role;
     private String gender;
     private String contactNumber;
     private String civilStatus;
