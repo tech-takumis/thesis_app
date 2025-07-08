@@ -1,0 +1,32 @@
+# Root
+.DS_Store
+*.log
+*.iml
+.idea/
+.vscode/
+.env
+.env.*  # In case you have multiple env files
+
+# Backend (Spring Boot - Maven/Gradle)
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/.gradle/
+backend/build/
+backend/out/
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# Frontend (Vue.js)
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+frontend/.output/
+
+# Optional OS-specific
+Thumbs.db
+ehthumbs.db
+desktop.ini
