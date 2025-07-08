@@ -3,8 +3,6 @@ package com.hashjosh.agripro.rsbsa;
 import com.hashjosh.agripro.rsbsa.dto.RsbsaRequestDto;
 import com.hashjosh.agripro.rsbsa.dto.RsbsaResponseDto;
 import com.hashjosh.agripro.user.models.User;
-import lombok.ToString;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,6 @@ public class RsbsaMapper {
                 .email(rsbsa.getEmail())
                 .password(passwordEncoder.encode(rsbsa.getDateOfBirth().toString()))
                 .fullname(rsbsa.getFirstName() + " " + rsbsa.getLastName())
-                .role("FARMER")
                 .build();
     }
 

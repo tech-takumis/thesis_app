@@ -10,9 +10,6 @@ public record StaffRegistrationRequestDto(
         @NotNull(message = "Email is required!")
         String email,
 
-        @NotBlank(message = "User role is required!")
-        @Pattern(regexp = "^(STAFF|FARMER)$")
-        String role,
         @NotNull(message = "Gender is required")
         @Size(min = 3, max = 50, message = "Gender must be between 3 and 50 characters")
         @Pattern(regexp = "^(?i)(MALE|FEMALE)&")
@@ -31,6 +28,6 @@ public record StaffRegistrationRequestDto(
         @NotBlank(message = "Location is required!")
         String location,
         @NotBlank(message = "Staff role is required!")
-        String subRole
+        String role
 ) {
 }

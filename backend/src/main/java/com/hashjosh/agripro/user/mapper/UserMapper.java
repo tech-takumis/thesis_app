@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.Random;
 
 @Service
 public class UserMapper {
@@ -26,7 +25,6 @@ public class UserMapper {
                 .fullname(dto.fullname())
                 .username(dto.email().split("@")[0])
                 .password(passwordEncoder.encode("123456789"))
-                .role(dto.role())
                 .gender(dto.gender())
                 .civilStatus(dto.civilStatus())
                 .contactNumber(dto.contactNumber())
@@ -41,7 +39,7 @@ public class UserMapper {
         return StaffProfile.builder()
                 .position(dto.position())
                 .department(dto.department())
-                .subROle(dto.subRole())
+                .role(dto.role())
                 .location(dto.location())
                 .user(User.builder()
                         .id(user.getId())
@@ -55,7 +53,6 @@ public class UserMapper {
                 .email(rsbsa.getEmail())
                 .password(passwordEncoder.encode(rsbsa.getDateOfBirth().toString()))
                 .fullname(rsbsa.getFirstName() + " " + rsbsa.getLastName())
-                .role("FARMER")
                 .gender(rsbsa.getGender())
                 .civilStatus(rsbsa.getCivilStatus())
                 .contactNumber(rsbsa.getContactNumber())
@@ -86,7 +83,7 @@ public class UserMapper {
 
     public AuthenticatedStaffResponseDto toAuthenticatedDto(User user) {
         return new AuthenticatedStaffResponseDto(user.getFullname(), user.getEmail(),
-                user.getStaffProfile().getSubROle(), user.getGender(), user.getContactNumber(),
+                user.getStaffProfile().getRole(), user.getGender(), user.getContactNumber(),
                 user.getCivilStatus(),user.getAddress(),user.getStaffProfile().getPosition(),
                 user.getStaffProfile().getDepartment(),user.getStaffProfile().getLocation());
     }

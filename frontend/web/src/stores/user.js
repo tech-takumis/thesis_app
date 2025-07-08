@@ -151,7 +151,7 @@ export const useUserStore = defineStore('users', {
                 processing.value = true
                 
                 // First login
-                await axios.post('/login', form.value);
+                await axios.post('/web/login', form.value);
                 
                 // Then fetch the authenticated user
                 const response = await axios.get('/auth/user');
