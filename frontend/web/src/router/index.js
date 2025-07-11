@@ -4,27 +4,27 @@ import { useUserStore } from '@/stores/user'
 const APP_NAME = import.meta.env.VITE_APP_NAME
 
 const routes = [
-    // Division Chief Dashboard (Management Level)
+    // Admin Dashboard
     {
-        path: '/division-chief/dashboard',
-        name: 'division-chief-dashboard',
-        component: () => import('../pages/division-chief/DivisionChiefDashboard.vue'),
+        path: '/admin/dashboard',
+        name: 'admin-dashboard',
+        component: () => import('@/pages/admin/AdminDashboard.vue'),
         meta: {
-            title: 'Division Chief Dashboard',
+            title: 'Admin Dashboard',
             guard: 'auth',
-            roles: ['Division Chief'],
+            roles: ['Admin'],
         },
     },
     
-    // Administrative Services Officer Dashboard
+    // Division Chief Dashboard
     {
-        path: '/admin-officer/dashboard',
-        name: 'admin-officer-dashboard',
-        component: () => import('../pages/admin-officer/AdminOfficerDashboard.vue'),
+        path: '/division-chief/dashboard',
+        name: 'division-chief-dashboard',
+        component: () => import('@/pages/division-chief/DivisionChiefDashboard.vue'),
         meta: {
-            title: 'Administrative Officer Dashboard',
+            title: 'Division Chief Dashboard',
             guard: 'auth',
-            roles: ['Administrative Services Officer'],
+            roles: ['Division_Chief'],
         },
     },
     
@@ -32,23 +32,23 @@ const routes = [
     {
         path: '/underwriter/dashboard',
         name: 'underwriter-dashboard',
-        component: () => import('../pages/underwriter/UnderwriterDashboard.vue'),
+        component: () => import('@/pages/underwriter/UnderwriterDashboard.vue'),
         meta: {
             title: 'Insurance Underwriter Dashboard',
             guard: 'auth',
-            roles: ['Insurance Underwriter'],
+            roles: ['Underwriter'],
         },
     },
     
-    // Insurance Specialist Dashboard
+    // Specialist Dashboard
     {
-        path: '/insurance-specialist/dashboard',
-        name: 'insurance-specialist-dashboard',
-        component: () => import('../pages/insurance-specialist/InsuranceSpecialistDashboard.vue'),
+        path: '/specialist/dashboard',
+        name: 'specialist-dashboard',
+        component: () => import('@/pages/specialist/SpecialistDashboard.vue'),
         meta: {
-            title: 'Insurance Specialist Dashboard',
+            title: 'Specialist Dashboard',
             guard: 'auth',
-            roles: ['Insurance Specialist'],
+            roles: ['Specialist'],
         },
     },
     
@@ -56,23 +56,23 @@ const routes = [
     {
         path: '/claims-processor/dashboard',
         name: 'claims-processor-dashboard',
-        component: () => import('../pages/claims-processor/ClaimsProcessorDashboard.vue'),
+        component: () => import('@/pages/claims-processor/ClaimsProcessorDashboard.vue'),
         meta: {
             title: 'Claims Processor Dashboard',
             guard: 'auth',
-            roles: ['Claims Processor'],
+            roles: ['Claims_Processor'],
         },
     },
     
-    // Insurance Adjuster Dashboard
+    // Adjuster Dashboard
     {
-        path: '/insurance-adjuster/dashboard',
-        name: 'insurance-adjuster-dashboard',
-        component: () => import('../pages/insurance-adjuster/InsuranceAdjusterDashboard.vue'),
+        path: '/adjuster/dashboard',
+        name: 'adjuster-dashboard',
+        component: () => import('@/pages/adjuster/AdjusterDashboard.vue'),
         meta: {
-            title: 'Insurance Adjuster Dashboard',
+            title: 'Adjuster Dashboard',
             guard: 'auth',
-            roles: ['Insurance Adjuster'],
+            roles: ['Adjuster'],
         },
     },
     
@@ -80,7 +80,7 @@ const routes = [
     {
         path: '/teller/dashboard',
         name: 'teller-dashboard',
-        component: () => import('../pages/teller/TellerDashboard.vue'),
+        component: () => import('@/pages/teller/TellerDashboard.vue'),
         meta: {
             title: 'Teller Dashboard',
             guard: 'auth',
@@ -88,22 +88,34 @@ const routes = [
         },
     },
     
+    // Multi-Role Dashboard (for users with multiple roles)
+    {
+        path: '/multi-role/dashboard',
+        name: 'multi-role-dashboard',
+        component: () => import('@/pages/multi-role/MultiRoleDashboard.vue'),
+        meta: {
+            title: 'Dashboard',
+            guard: 'auth',
+            // No specific roles - accessible to any authenticated user
+        },
+    },
+    
     // Default Staff Dashboard (fallback)
     {
         path: '/staff/dashboard',
         name: 'staff-dashboard',
-        component: () => import('../pages/staff/StaffDashboard.vue'),
+        component: () => import('@/pages/staff/StaffDashboard.vue'),
         meta: {
             title: 'Staff Dashboard',
             guard: 'auth',
             roles: [
                 'Teller',
-                'Insurance Specialist',
-                'Administrative Services Officer',
-                'Insurance Underwriter',
-                'Division Chief',
-                'Claims Processor',
-                'Insurance Adjuster'
+                'Specialist',
+                'Admin',
+                'Underwriter',
+                'Division_Chief',
+                'Claims_Processor',
+                'Adjuster'
             ],
         },
     },
@@ -126,7 +138,7 @@ const routes = [
     {
         path: '/',
         name: 'login',
-        component: () => import('../pages/auth/Login.vue'),
+        component: () => import('@/pages/auth/Login.vue'),
         query: {
             reset: 'reset',
         },
@@ -140,7 +152,7 @@ const routes = [
     {
         path: '/access-denied',
         name: 'access-denied',
-        component: () => import('../pages/errors/AccessDenied.vue'),
+        component: () => import('@/pages/errors/AccessDenied.vue'),
         meta: {
             title: 'Access Denied',
         },
@@ -148,7 +160,7 @@ const routes = [
     {
         path: '/page-not-found',
         name: 'page-not-found',
-        component: () => import('../pages/errors/404.vue'),
+        component: () => import('@/pages/errors/404.vue'),
         meta: {
             title: 'Page Not Found',
         },
@@ -195,20 +207,22 @@ router.beforeEach(async (to, from, next) => {
 
         // Validate PCIC staff access
         if (!store.isValidStaff) {
-            console.error('User is not valid staff:', store.userData?.role)
+            console.error('User is not valid staff:', store.userData?.roles)
             return next({ name: 'access-denied' })
         }
 
-        console.log('User is valid staff:', store.userData?.role)
+        console.log('User is valid staff with roles:', store.userData?.roles)
 
-        // Check role-based access
+        // Check role-based access (user must have at least one of the required roles)
         if (requiredRoles && requiredRoles.length > 0) {
-            const userRole = store.userData?.role
+            const userRoles = store.userData?.roles || []
 
-            console.log('Checking role access - User role:', userRole, 'Required roles:', requiredRoles)
+            console.log('Checking role access - User roles:', userRoles, 'Required roles:', requiredRoles)
 
-            if (!requiredRoles.includes(userRole)) {
-                console.log('User role not allowed for this route, redirecting to appropriate dashboard')
+            const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role))
+
+            if (!hasRequiredRole) {
+                console.log('User roles not allowed for this route, redirecting to appropriate dashboard')
                 // Redirect to appropriate dashboard based on role
                 return next(store.getRedirectPath())
             }
