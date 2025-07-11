@@ -9,7 +9,6 @@ public record AuthenticatedStaffResponseDto(
         String fullname,
         String email,
         Set<String> roles,
-        Set<String> authorities,
         String gender,
         String contactNumber,
         String civilStatus,

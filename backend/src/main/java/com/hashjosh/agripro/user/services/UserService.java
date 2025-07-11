@@ -13,6 +13,7 @@ import com.hashjosh.agripro.user.repository.StaffProfileRepository;
 import com.hashjosh.agripro.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -70,10 +71,10 @@ public class UserService {
         return "Farmer created successfully";
     }
 
-    public String deleteUser(long id) {
+    public void deleteUser(int id) {
 
-        userRepository.deleteUserById(id);
+        User user = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id::: "+ id));
+        userRepository.delete(user);
 
-        return "User ::: "+id +"deleted successfully";
     }
 }

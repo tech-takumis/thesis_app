@@ -15,7 +15,7 @@ public class AuthMapper {
 
     public AuthenticatedStaffResponseDto toAuthenticatedDto(User user) {
         return new AuthenticatedStaffResponseDto(user.getFullname(), user.getEmail(),
-                userRoles(user), userAuthorities(user),
+                userRoles(user),
                 user.getGender(), user.getContactNumber(),
                 user.getCivilStatus(),user.getAddress(),user.getStaffProfile().getPosition(),
                 user.getStaffProfile().getDepartment(),user.getStaffProfile().getLocation());
