@@ -107,7 +107,6 @@ public class UserMapper {
                 .build();
     }
 
-
     private Set<Authority> getAuthoritiesFromRequest(RoleDto roleDto) {
         return roleDto.authorities().stream().map(
                 this::getOrCreateAuthority

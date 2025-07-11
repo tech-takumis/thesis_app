@@ -34,6 +34,7 @@ public class JwtUtil {
         roles.forEach(role -> claims.put("role", role));
         authorities.forEach(authority -> claims.put("authority", authority));
 
+
         return  Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
