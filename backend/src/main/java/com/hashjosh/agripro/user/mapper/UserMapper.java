@@ -2,22 +2,30 @@ package com.hashjosh.agripro.user.mapper;
 
 import com.hashjosh.agripro.rsbsa.RsbsaModel;
 import com.hashjosh.agripro.user.dto.AuthenticatedStaffResponseDto;
+import com.hashjosh.agripro.user.dto.AuthorityDto;
+import com.hashjosh.agripro.user.dto.RoleDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
-import com.hashjosh.agripro.user.models.FarmerProfile;
-import com.hashjosh.agripro.user.models.StaffProfile;
-import com.hashjosh.agripro.user.models.User;
+import com.hashjosh.agripro.user.models.*;
+import com.hashjosh.agripro.user.repository.AuthorityRepository;
+import com.hashjosh.agripro.user.repository.RoleRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserMapper {
 
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final AuthorityRepository authorityRepository;
 
-    public UserMapper(PasswordEncoder passwordEncoder) {
+    public UserMapper(PasswordEncoder passwordEncoder, RoleRepository roleRepository, AuthorityRepository authorityRepository) {
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+        this.authorityRepository = authorityRepository;
     }
 
     public User toRegisterStaff(StaffRegistrationRequestDto dto) {
@@ -27,6 +35,17 @@ public class UserMapper {
                 .password(passwordEncoder.encode("123456789"))
                 .gender(dto.gender())
                 .civilStatus(dto.civilStatus())
+                .roles(dto.roles().stream().map(
+                        roleDto -> {
+                            Role role = getOrCreateRole(roleDto);
+
+                            Set<Authority> authorities = getAuthoritiesFromRequest(roleDto);
+
+                            role.setAuthorities(authorities);
+
+                            return role;
+                        }
+                ).collect(Collectors.toSet()))
                 .contactNumber(dto.contactNumber())
                 .address(dto.address())
                 .email(dto.email())
@@ -39,7 +58,6 @@ public class UserMapper {
         return StaffProfile.builder()
                 .position(dto.position())
                 .department(dto.department())
-                .role(dto.role())
                 .location(dto.location())
                 .user(User.builder()
                         .id(user.getId())
@@ -47,10 +65,18 @@ public class UserMapper {
                 .build();
     }
 
-    public User rsbsaToFarmer(RsbsaModel rsbsa) {
+    public User rsbsaToFarmer(RsbsaModel rsbsa, Set<RoleDto> roles) {
         return  User.builder()
                 .username(rsbsa.getRsbsaId())
                 .email(rsbsa.getEmail())
+                .roles(roles.stream().map(
+                        roleDto -> {
+                            Role role = getOrCreateRole(roleDto);
+                            Set<Authority> authorities = getAuthoritiesFromRequest(roleDto);
+                            role.setAuthorities(authorities);
+                            return role;
+                        }
+                ).collect(Collectors.toSet()))
                 .password(passwordEncoder.encode(rsbsa.getDateOfBirth().toString()))
                 .fullname(rsbsa.getFirstName() + " " + rsbsa.getLastName())
                 .gender(rsbsa.getGender())
@@ -81,10 +107,26 @@ public class UserMapper {
                 .build();
     }
 
-    public AuthenticatedStaffResponseDto toAuthenticatedDto(User user) {
-        return new AuthenticatedStaffResponseDto(user.getFullname(), user.getEmail(),
-                user.getStaffProfile().getRole(), user.getGender(), user.getContactNumber(),
-                user.getCivilStatus(),user.getAddress(),user.getStaffProfile().getPosition(),
-                user.getStaffProfile().getDepartment(),user.getStaffProfile().getLocation());
+    private Set<Authority> getAuthoritiesFromRequest(RoleDto roleDto) {
+        return roleDto.authorities().stream().map(
+                this::getOrCreateAuthority
+        ).collect(Collectors.toSet());
     }
+
+    private Authority getOrCreateAuthority(AuthorityDto authorityDto) {
+        return authorityRepository.findByName(authorityDto.name()).orElseGet(() -> authorityRepository.save(
+                Authority.builder()
+                        .name(authorityDto.name())
+                        .build()
+        ));
+    }
+
+    private Role getOrCreateRole(RoleDto roleDto) {
+        return roleRepository.findByName(roleDto.name()).orElseGet(() -> roleRepository.save(
+                Role.builder()
+                        .name(roleDto.name())
+                        .build()
+        ));
+    }
+
 }

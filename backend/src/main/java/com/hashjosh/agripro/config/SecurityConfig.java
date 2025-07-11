@@ -40,7 +40,8 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/web/login" ,"/api/v1/register/farmers","/mobile/login","/csrf-cookie").permitAll()
+                        .requestMatchers("/web/login" ,"/api/v1/register/farmers","/mobile/login",
+                                "/csrf-cookie","/api/v1/register/staffs").permitAll()
                         .requestMatchers("/api/v1/rsbsa/**").hasRole("ADMINISTRATIVE_SERVICES_OFFICER")
                         .anyRequest().authenticated()
                 )

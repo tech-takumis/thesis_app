@@ -2,7 +2,6 @@ package com.hashjosh.agripro.user.services;
 
 import com.hashjosh.agripro.rsbsa.RsbsaModel;
 import com.hashjosh.agripro.rsbsa.RsbsaRepository;
-import com.hashjosh.agripro.user.dto.AuthenticatedStaffResponseDto;
 import com.hashjosh.agripro.user.dto.FarmerRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
 import com.hashjosh.agripro.user.mapper.UserMapper;
@@ -14,7 +13,6 @@ import com.hashjosh.agripro.user.repository.StaffProfileRepository;
 import com.hashjosh.agripro.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -60,7 +58,7 @@ public class UserService {
             return "Failed to create farmer rsbsa id does not exist";
         }
 
-        User farmer = mapper.rsbsaToFarmer(rsbsa);
+        User farmer = mapper.rsbsaToFarmer(rsbsa, dto.roles());
         var savedFarmer = userRepository.save(farmer);
 
         FarmerProfile farmerProfile = mapper.rsbsaToFarmerProfile(rsbsa, savedFarmer);
@@ -72,10 +70,10 @@ public class UserService {
         return "Farmer created successfully";
     }
 
-    public AuthenticatedStaffResponseDto authenticatedUser(String username) {
+    public String deleteUser(long id) {
 
-        return userRepository.findByUsername(username)
-                .map(mapper::toAuthenticatedDto)
-                .orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
+        userRepository.deleteUserById(id);
+
+        return "User ::: "+id +"deleted successfully";
     }
 }
