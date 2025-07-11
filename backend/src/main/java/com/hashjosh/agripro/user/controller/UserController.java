@@ -2,6 +2,7 @@ package com.hashjosh.agripro.user.controller;
 
 import com.hashjosh.agripro.user.dto.FarmerRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
+import com.hashjosh.agripro.user.models.User;
 import com.hashjosh.agripro.user.services.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -20,7 +21,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PreAuthorize("hasRole('STAFF_ADMIN')")
+//    @PreAuthorize("hasRole('STAFF_ADMIN')")
     @PostMapping("/register/staffs")
     public ResponseEntity<String> registerStaff(
             @RequestBody @Valid  StaffRegistrationRequestDto dto
@@ -33,5 +34,12 @@ public class UserController {
             @RequestBody @Valid FarmerRegistrationRequestDto dto
     ) throws MessagingException {
         return new ResponseEntity<>(userService.registerFarmer(dto), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<String> deleteUser(
+            @PathVariable long id
+    ){
+        return new ResponseEntity<>(userService.deleteUser(id),HttpStatus.NO_CONTENT);
     }
 }

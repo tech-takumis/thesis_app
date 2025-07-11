@@ -17,7 +17,6 @@ public class StaffProfile {
     private String position;
     private String department;
     private String location;
-    private String role;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")

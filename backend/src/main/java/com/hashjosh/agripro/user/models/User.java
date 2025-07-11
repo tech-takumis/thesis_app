@@ -1,10 +1,12 @@
 package com.hashjosh.agripro.user.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.hashjosh.agripro.user.dto.RoleDto;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
 
 @Entity
@@ -29,11 +31,22 @@ public class User {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JsonManagedReference("user-farmer")
     private FarmerProfile farmerProfile;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JsonManagedReference("user-staff")
     private StaffProfile staffProfile;
+
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_Id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
+    )
+    @JsonManagedReference("user-roles")
+    private Set<Role> roles;
 }
