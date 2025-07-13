@@ -3,7 +3,7 @@ package com.hashjosh.agripro.user.controller;
 import com.hashjosh.agripro.config.CustomUserDetails;
 import com.hashjosh.agripro.user.dto.LoginRequestDTO;
 import com.hashjosh.agripro.user.models.User;
-import com.hashjosh.agripro.user.repository.AuthorityRepository;
+import com.hashjosh.agripro.authority.AuthorityRepository;
 import com.hashjosh.agripro.user.services.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -71,7 +71,6 @@ public class AuthController {
                     loginRequest.password(),
                     loginRequest.remember()
             );
-
 
             return ResponseEntity.ok(Map.of("message", "Login successful", "jwt", result.jwt()));
         }catch (IllegalStateException e){

@@ -29,5 +29,5 @@ public class InsuranceType {
 
     @OneToMany(mappedBy = "insuranceType", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("insurance-type")
-    private List<InsuranceField> fieldList;
+    private List<InsuranceField> fields;
 }

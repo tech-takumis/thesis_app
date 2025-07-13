@@ -1,6 +1,5 @@
-package com.hashjosh.agripro.user.repository;
+package com.hashjosh.agripro.authority;
 
-import com.hashjosh.agripro.user.models.Authority;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -2,11 +2,10 @@ package com.hashjosh.agripro.user.services;
 
 import com.hashjosh.agripro.config.CustomUserDetails;
 import com.hashjosh.agripro.config.JwtUtil;
-import com.hashjosh.agripro.user.dto.AuthenticatedStaffResponseDto;
+import com.hashjosh.agripro.user.dto.StaffResponseDto;
 import com.hashjosh.agripro.user.mapper.AuthMapper;
 import com.hashjosh.agripro.user.models.User;
 import com.hashjosh.agripro.user.repository.UserRepository;
-import lombok.Getter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -51,16 +50,16 @@ public class AuthService {
     public String generateToken(User user) {
         List<String> authorities = user.getRoles().stream()
                 .flatMap(role -> role.getAuthorities().stream().map(
-                        authority -> authority.toString().toUpperCase().replace(" ", "_")
+                        authority -> authority.getName().toUpperCase().replace(" ", "_")
                 ))
                 .toList();
-        List<String> roles = user.getRoles().stream().map(
-                role -> "ROLE_"+role.toString().toUpperCase()
-        ).toList();
+        List<String> roles = user.getRoles().stream()
+                .map(role -> "ROLE_" + role.getName().toUpperCase().replace(" ", "_"))
+                .toList();
 
         return jwtUtil.generateToken(user.getUsername(),roles, authorities);
     }
-    public AuthenticatedStaffResponseDto authenticatedUser(String username) {
+    public StaffResponseDto authenticatedUser(String username) {
 
         return userRepository.findByUsername(username)
                 .map(mapper::toAuthenticatedDto)

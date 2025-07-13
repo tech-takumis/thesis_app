@@ -1,7 +1,9 @@
-package com.hashjosh.agripro.user.models;
+package com.hashjosh.agripro.role;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.hashjosh.agripro.authority.Authority;
+import com.hashjosh.agripro.user.models.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +24,6 @@ public class Role {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    @JsonBackReference("user-roles")
     private Set<User> users;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -31,6 +32,5 @@ public class Role {
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id")
     )
-    @JsonManagedReference("role-authorities")
     private Set<Authority> authorities;
 }

@@ -1,6 +1,5 @@
-package com.hashjosh.agripro.user.repository;
+package com.hashjosh.agripro.role;
 
-import com.hashjosh.agripro.user.models.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

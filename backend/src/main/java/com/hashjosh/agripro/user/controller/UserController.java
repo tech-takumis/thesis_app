@@ -2,6 +2,7 @@ package com.hashjosh.agripro.user.controller;
 
 import com.hashjosh.agripro.user.dto.FarmerRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
+import com.hashjosh.agripro.user.dto.StaffResponseDto;
 import com.hashjosh.agripro.user.models.User;
 import com.hashjosh.agripro.user.services.UserService;
 import jakarta.mail.MessagingException;
@@ -10,8 +11,10 @@ import jakarta.validation.Valid;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.Serializable;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,11 +34,27 @@ public class UserController {
         return ResponseEntity.ok(userService.registerStaff(dto));
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<StaffResponseDto> getUser(@PathVariable int id) {
+        return new ResponseEntity<>(userService.findUser(id), HttpStatus.FOUND);
+    }
+
+    @PutMapping("/staff/{id}/role/{roleId}")
+    public ResponseEntity<String> updateStaffRole(
+            @PathVariable Long roleId, @PathVariable int id
+            ){
+        return new ResponseEntity<>(userService.updateStaffRole(roleId, id), HttpStatus.ACCEPTED);
+    }
+
     @PostMapping("/register/farmers")
-    public ResponseEntity<String> registerFarmer(
+    public ResponseEntity<Map<String, Serializable>> registerFarmer(
             @RequestBody @Valid FarmerRegistrationRequestDto dto
     ) throws MessagingException {
-        return new ResponseEntity<>(userService.registerFarmer(dto), HttpStatus.CREATED);
+        User user  = userService.registerFarmer(dto);
+        return new ResponseEntity<>(Map.of(
+                "message", "Farmer created sucessfully!",
+                "username", user.getUsername()
+        ), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/users/{id}")
@@ -48,5 +67,10 @@ public class UserController {
         }catch(EmptyResultDataAccessException ex){
             throw new EntityNotFoundException("User with id " + id + " not found");
         }
-     }
+    }
+
+
+
+
+
 }

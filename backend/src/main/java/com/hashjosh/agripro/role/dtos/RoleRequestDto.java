@@ -1,12 +1,13 @@
-package com.hashjosh.agripro.user.dto;
+package com.hashjosh.agripro.role.dtos;
 
+import com.hashjosh.agripro.authority.Authority;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Set;
 
-public record RoleDto(
+public record RoleRequestDto(
         @NotBlank(message = "Role name is required!")
         String name,
-        Set<AuthorityDto> authorities
+        Set<Authority> authorities
  ) {
 }

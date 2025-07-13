@@ -1,6 +1,7 @@
-package com.hashjosh.agripro.user.models;
+package com.hashjosh.agripro.authority;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.hashjosh.agripro.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +23,5 @@ public class Authority {
 
 
     @ManyToMany(mappedBy = "authorities")
-    @JsonBackReference("role-authorities")
     private Set<Role> roles;
 }

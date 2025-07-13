@@ -2,8 +2,6 @@ package com.hashjosh.agripro.user.dto;
 
 import jakarta.validation.constraints.*;
 
-import java.util.Set;
-
 public record StaffRegistrationRequestDto(
         @NotNull(message = "Fullname is required")
         @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
@@ -30,7 +28,7 @@ public record StaffRegistrationRequestDto(
         @NotBlank(message = "Location is required!")
         String location,
 
-        Set<RoleDto> roles
+        String role
 
 ) {
 }
