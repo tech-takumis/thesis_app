@@ -17,7 +17,26 @@ export const useUserStore = defineStore('users', {
         // User basic info
         userFullName: state => state.userData?.fullname || '',
         userEmail: state => state.userData?.email || '',
-        userRole: state => state.userData?.role || null,
+        userRoles: state => state.userData?.roles || [], // Now returns array of roles
+        userPrimaryRole: state => {
+            // Get the highest priority role for display purposes
+            const roles = state.userData?.roles || []
+            const rolePriority = {
+                'Admin': 5,
+                'Division_Chief': 4,
+                'Underwriter': 3,
+                'Specialist': 2,
+                'Claims_Processor': 2,
+                'Adjuster': 2,
+                'Teller': 1
+            }
+            
+            return roles.reduce((highest, role) => {
+                const currentPriority = rolePriority[role] || 0
+                const highestPriority = rolePriority[highest] || 0
+                return currentPriority > highestPriority ? role : highest
+            }, roles[0] || null)
+        },
         userGender: state => state.userData?.gender || '',
         userContactNumber: state => state.userData?.contactNumber || '',
         userCivilStatus: state => state.userData?.civilStatus || '',
@@ -26,54 +45,54 @@ export const useUserStore = defineStore('users', {
         userDepartment: state => state.userData?.department || '',
         userLocation: state => state.userData?.location || '',
         
-        // Role-specific checks (updated without Roman numerals)
-        isTeller: state => state.userData?.role === 'Teller',
-        isInsuranceSpecialist: state => state.userData?.role === 'Insurance Specialist',
-        isAdminOfficer: state => state.userData?.role === 'Administrative Services Officer',
-        isUnderwriter: state => state.userData?.role === 'Insurance Underwriter',
-        isDivisionChief: state => state.userData?.role === 'Division Chief',
-        isClaimsProcessor: state => state.userData?.role === 'Claims Processor',
-        isInsuranceAdjuster: state => state.userData?.role === 'Insurance Adjuster',
+        // Role-specific checks (updated for multiple roles)
+        isTeller: state => (state.userData?.roles || []).includes('Teller'),
+        isSpecialist: state => (state.userData?.roles || []).includes('Specialist'),
+        isAdmin: state => (state.userData?.roles || []).includes('Admin'),
+        isUnderwriter: state => (state.userData?.roles || []).includes('Underwriter'),
+        isDivisionChief: state => (state.userData?.roles || []).includes('Division_Chief'),
+        isClaimsProcessor: state => (state.userData?.roles || []).includes('Claims_Processor'),
+        isAdjuster: state => (state.userData?.roles || []).includes('Adjuster'),
         
-        // Permission levels (hierarchical)
+        // Permission levels (hierarchical) - checks if user has any role at this level
         isManagementLevel: state => {
-            const managementRoles = ['Division Chief']
-            return managementRoles.includes(state.userData?.role)
+            const managementRoles = ['Admin', 'Division_Chief']
+            const userRoles = state.userData?.roles || []
+            return managementRoles.some(role => userRoles.includes(role))
         },
         
         isSupervisoryLevel: state => {
-            const supervisoryRoles = ['Division Chief', 'Administrative Services Officer']
-            return supervisoryRoles.includes(state.userData?.role)
+            const supervisoryRoles = ['Admin', 'Division_Chief', 'Underwriter']
+            const userRoles = state.userData?.roles || []
+            return supervisoryRoles.some(role => userRoles.includes(role))
         },
         
         isSpecialistLevel: state => {
-            const specialistRoles = [
-                'Insurance Specialist', 
-                'Insurance Underwriter', 
-                'Claims Processor', 
-                'Insurance Adjuster'
-            ]
-            return specialistRoles.includes(state.userData?.role)
+            const specialistRoles = ['Specialist', 'Underwriter', 'Claims_Processor', 'Adjuster']
+            const userRoles = state.userData?.roles || []
+            return specialistRoles.some(role => userRoles.includes(role))
         },
         
         isOperationalLevel: state => {
             const operationalRoles = ['Teller']
-            return operationalRoles.includes(state.userData?.role)
+            const userRoles = state.userData?.roles || []
+            return operationalRoles.some(role => userRoles.includes(role))
         },
         
-        // Check if user is valid PCIC staff (updated roles)
+        // Check if user is valid PCIC staff (has at least one valid role)
         isValidStaff: state => {
             const validRoles = [
                 'Teller',
-                'Insurance Specialist',
-                'Administrative Services Officer',
-                'Insurance Underwriter',
-                'Division Chief',
-                'Claims Processor',
-                'Insurance Adjuster'
+                'Specialist',
+                'Admin',
+                'Underwriter',
+                'Division_Chief',
+                'Claims_Processor',
+                'Adjuster'
             ]
-            console.log('Checking role:', state.userData?.role, 'Valid roles:', validRoles)
-            return validRoles.includes(state.userData?.role)
+            const userRoles = state.userData?.roles || []
+            console.log('Checking roles:', userRoles, 'Valid roles:', validRoles)
+            return userRoles.some(role => validRoles.includes(role))
         },
 
         // Get user display info
@@ -83,7 +102,8 @@ export const useUserStore = defineStore('users', {
             return {
                 name: state.userData.fullname,
                 email: state.userData.email,
-                role: state.userData.role,
+                roles: state.userData.roles,
+                primaryRole: state.userData.roles?.[0] || null,
                 position: state.userData.position,
                 department: state.userData.department,
                 location: state.userData.location,
@@ -94,19 +114,34 @@ export const useUserStore = defineStore('users', {
             }
         },
 
-        // Get role category for UI purposes
+        // Get role category for UI purposes (based on primary role)
         roleCategory: state => {
-            const role = state.userData?.role
-            if (!role) return 'Unknown'
+            const primaryRole = state.userData?.roles?.[0]
+            if (!primaryRole) return 'Unknown'
             
-            if (role === 'Division Chief') return 'Management'
-            if (role === 'Administrative Services Officer') return 'Administration'
-            if (['Insurance Specialist', 'Insurance Underwriter', 'Claims Processor', 'Insurance Adjuster'].includes(role)) {
+            if (['Admin', 'Division_Chief'].includes(primaryRole)) return 'Management'
+            if (['Specialist', 'Underwriter', 'Claims_Processor', 'Adjuster'].includes(primaryRole)) {
                 return 'Insurance Operations'
             }
-            if (role === 'Teller') return 'Financial Services'
+            if (primaryRole === 'Teller') return 'Financial Services'
             
             return 'Staff'
+        },
+
+        // Get all role categories user belongs to
+        allRoleCategories: state => {
+            const roles = state.userData?.roles || []
+            const categories = new Set()
+            
+            roles.forEach(role => {
+                if (['Admin', 'Division_Chief'].includes(role)) categories.add('Management')
+                if (['Specialist', 'Underwriter', 'Claims_Processor', 'Adjuster'].includes(role)) {
+                    categories.add('Insurance Operations')
+                }
+                if (role === 'Teller') categories.add('Financial Services')
+            })
+            
+            return Array.from(categories)
         }
     },
 
@@ -118,23 +153,26 @@ export const useUserStore = defineStore('users', {
                 
                 console.log('User data received:', this.userData)
                 
-                // Validate that user has a valid PCIC role
+                // Validate that user has at least one valid PCIC role
                 const validRoles = [
                     'Teller',
-                    'Insurance Specialist',
-                    'Administrative Services Officer',
-                    'Insurance Underwriter',
-                    'Division Chief',
-                    'Claims Processor',
-                    'Insurance Adjuster'
+                    'Specialist',
+                    'Admin',
+                    'Underwriter',
+                    'Division_Chief',
+                    'Claims_Processor',
+                    'Adjuster'
                 ]
                 
-                if (!validRoles.includes(this.userData?.role)) {
-                    console.error('Invalid role detected:', this.userData?.role)
+                const userRoles = this.userData?.roles || []
+                const hasValidRole = userRoles.some(role => validRoles.includes(role))
+                
+                if (!hasValidRole) {
+                    console.error('No valid roles detected:', userRoles)
                     throw new Error('Access denied: Valid PCIC staff role required')
                 }
                 
-                console.log('Role validation passed for:', this.userData?.role)
+                console.log('Role validation passed for roles:', userRoles)
                 
             } catch (error) {
                 if (error.response?.status === 409) {
@@ -161,25 +199,28 @@ export const useUserStore = defineStore('users', {
                     
                     console.log('Login successful, user data:', this.userData)
                     
-                    // Validate PCIC staff access
+                    // Validate PCIC staff access (check if user has at least one valid role)
                     const validRoles = [
                         'Teller',
-                        'Insurance Specialist',
-                        'Administrative Services Officer',
-                        'Insurance Underwriter',
-                        'Division Chief',
-                        'Claims Processor',
-                        'Insurance Adjuster'
+                        'Specialist',
+                        'Admin',
+                        'Underwriter',
+                        'Division_Chief',
+                        'Claims_Processor',
+                        'Adjuster',
                     ]
                     
-                    if (!validRoles.includes(this.userData?.role)) {
-                        console.error('Access denied for role:', this.userData?.role)
+                    const userRoles = this.userData?.roles || []
+                    const hasValidRole = userRoles.some(role => validRoles.includes(role))
+                    
+                    if (!hasValidRole) {
+                        console.error('Access denied for roles:', userRoles)
                         setErrors.value = ['Access denied: This portal is for PCIC staff members only.']
                         await this.logout()
                         return
                     }
                     
-                    console.log('Access granted for role:', this.userData?.role)
+                    console.log('Access granted for roles:', userRoles)
                     
                     // Role-based redirect
                     const redirectPath = this.getRedirectPath()
@@ -201,94 +242,123 @@ export const useUserStore = defineStore('users', {
             }
         },
 
-        // Get redirect path based on user role (updated without Roman numerals)
+        // Get redirect path based on user's highest priority role
         getRedirectPath() {
-            const role = this.userData?.role
-
-            switch(role) {
-                case 'Division Chief':
-                    return { name: 'division-chief-dashboard' }
-                case 'Administrative Services Officer':
-                    return { name: 'admin-officer-dashboard' }
-                case 'Insurance Underwriter':
-                    return { name: 'underwriter-dashboard' }
-                case 'Insurance Specialist':
-                    return { name: 'insurance-specialist-dashboard' }
-                case 'Claims Processor':
-                    return { name: 'claims-processor-dashboard' }
-                case 'Insurance Adjuster':
-                    return { name: 'insurance-adjuster-dashboard' }
-                case 'Teller':
-                    return { name: 'teller-dashboard' }
-                default:
-                    return { name: 'staff-dashboard' }
+            const roles = this.userData?.roles || []
+            
+            // Priority order for redirect (highest to lowest)
+            const rolePriority = [
+                'Admin',
+                'Division_Chief',
+                'Underwriter',
+                'Specialist',
+                'Claims_Processor',
+                'Adjuster',
+                'Teller'
+            ]
+            
+            // Find the highest priority role the user has
+            for (const role of rolePriority) {
+                if (roles.includes(role)) {
+                    switch(role) {
+                        case 'Admin':
+                            return { name: 'admin-dashboard' }
+                        case 'Division_Chief':
+                            return { name: 'division-chief-dashboard' }
+                        case 'Underwriter':
+                            return { name: 'underwriter-dashboard' }
+                        case 'Specialist':
+                            return { name: 'specialist-dashboard' }
+                        case 'Claims_Processor':
+                            return { name: 'claims-processor-dashboard' }
+                        case 'Adjuster':
+                            return { name: 'adjuster-dashboard' }
+                        case 'Teller':
+                            return { name: 'teller-dashboard' }
+                    }
+                }
             }
+            
+            // Fallback to staff dashboard
+            return { name: 'staff-dashboard' }
         },
 
         // Check if user has specific role
         hasRole(role) {
-            return this.userData?.role === role
+            const userRoles = this.userData?.roles || []
+            return userRoles.includes(role)
         },
 
         // Check if user has any of the specified roles
         hasAnyRole(roles) {
-            return Array.isArray(roles) && 
-                   roles.includes(this.userData?.role)
+            if (!Array.isArray(roles)) return false
+            const userRoles = this.userData?.roles || []
+            return roles.some(role => userRoles.includes(role))
         },
 
-        // Check if user has permission level (hierarchical) - updated roles
+        // Check if user has all of the specified roles
+        hasAllRoles(roles) {
+            if (!Array.isArray(roles)) return false
+            const userRoles = this.userData?.roles || []
+            return roles.every(role => userRoles.includes(role))
+        },
+
+        // Check if user has permission level (hierarchical)
         hasPermissionLevel(level) {
             const hierarchy = {
-                'Division Chief': 5,                        // Management
-                'Administrative Services Officer': 4,       // Administration
-                'Insurance Underwriter': 3,                 // Senior Specialist
-                'Insurance Specialist': 3,                  // Senior Specialist
-                'Claims Processor': 2,                      // Specialist
-                'Insurance Adjuster': 2,                    // Specialist
-                'Teller': 1                                 // Operational
+                'Admin': 5,
+                'Division_Chief': 4,
+                'Underwriter': 3,
+                'Specialist': 2,
+                'Claims_Processor': 2,
+                'Adjuster': 2,
+                'Teller': 1
             }
             
-            const userLevel = hierarchy[this.userData?.role] || 0
+            const userRoles = this.userData?.roles || []
+            const userMaxLevel = Math.max(...userRoles.map(role => hierarchy[role] || 0))
             const requiredLevel = hierarchy[level] || 0
             
-            return userLevel >= requiredLevel
+            return userMaxLevel >= requiredLevel
         },
 
-        // Check if user can access specific features (updated roles)
+        // Check if user can access specific features
         canAccess(feature) {
             const permissions = {
                 // Management features
-                'staff-management': ['Division Chief'],
-                'system-administration': ['Division Chief', 'Administrative Services Officer'],
-                'financial-reports': ['Division Chief', 'Administrative Services Officer'],
+                'staff-management': ['Admin', 'Division_Chief'],
+                'system-administration': ['Admin'],
+                'financial-reports': ['Admin', 'Division_Chief'],
                 
                 // Insurance operations
-                'policy-underwriting': ['Division Chief', 'Insurance Underwriter'],
-                'risk-assessment': ['Division Chief', 'Insurance Underwriter', 'Insurance Specialist'],
-                'policy-issuance': ['Division Chief', 'Insurance Underwriter', 'Insurance Specialist'],
+                'policy-underwriting': ['Admin', 'Underwriter'],
+                'risk-assessment': ['Admin', 'Underwriter', 'Specialist'],
+                'policy-issuance': ['Admin', 'Underwriter', 'Specialist'],
                 
                 // Claims management
-                'claims-processing': ['Division Chief', 'Claims Processor', 'Insurance Adjuster'],
-                'claims-investigation': ['Division Chief', 'Insurance Adjuster'],
-                'claims-approval': ['Division Chief', 'Insurance Adjuster'],
+                'claims-processing': ['Admin', 'Claims_Processor', 'Adjuster'],
+                'claims-investigation': ['Admin', 'Adjuster'],
+                'claims-approval': ['Admin', 'Adjuster'],
                 
                 // Financial operations
-                'payment-processing': ['Division Chief', 'Administrative Services Officer', 'Teller'],
-                'transaction-management': ['Division Chief', 'Administrative Services Officer', 'Teller'],
+                'payment-processing': ['Admin', 'Teller'],
+                'transaction-management': ['Admin', 'Teller'],
                 
                 // General access
-                'view-policies': ['Division Chief', 'Administrative Services Officer', 'Insurance Underwriter', 'Insurance Specialist', 'Claims Processor', 'Insurance Adjuster'],
-                'view-claims': ['Division Chief', 'Administrative Services Officer', 'Claims Processor', 'Insurance Adjuster'],
-                'basic-reports': ['Division Chief', 'Administrative Services Officer', 'Insurance Underwriter', 'Insurance Specialist', 'Claims Processor', 'Insurance Adjuster', 'Teller']
+                'view-policies': ['Admin', 'Underwriter', 'Specialist', 'Claims_Processor', 'Adjuster'],
+                'view-claims': ['Admin', 'Claims_Processor', 'Adjuster'],
+                'basic-reports': ['Admin', 'Division_Chief', 'Underwriter', 'Specialist', 'Claims_Processor', 'Adjuster', 'Teller']
             }
             
             const allowedRoles = permissions[feature] || []
-            return allowedRoles.includes(this.userData?.role)
+            return this.hasAnyRole(allowedRoles)
         },
 
-        // Get user's primary responsibilities (updated roles)
-        getPrimaryResponsibilities() {
-            const role = this.userData?.role
+        // Get user's combined responsibilities from all roles
+        getAllResponsibilities() {
+            const roles = this.userData?.roles || []
+            const allResponsibilities = new Set()
+            
             const responsibilities = {
                 'Teller': [
                     'Handle financial transactions',
@@ -296,37 +366,37 @@ export const useUserStore = defineStore('users', {
                     'Maintain transaction records',
                     'Customer service for financial matters'
                 ],
-                'Insurance Specialist': [
+                'Specialist': [
                     'Policy issuance and management',
                     'Customer consultation on insurance products',
                     'Process insurance applications',
                     'Specialized insurance-related tasks'
                 ],
-                'Administrative Services Officer': [
-                    'Personnel management',
-                    'Records management',
-                    'Procurement oversight',
-                    'Administrative coordination'
+                'Admin': [
+                    'System administration',
+                    'User management',
+                    'Administrative oversight',
+                    'Policy and procedure management'
                 ],
-                'Insurance Underwriter': [
+                'Underwriter': [
                     'Risk assessment and analysis',
                     'Determine coverage and premiums',
                     'Review and approve policies',
                     'Underwriting guidelines compliance'
                 ],
-                'Division Chief': [
+                'Division_Chief': [
                     'Division leadership and management',
                     'Strategic planning and oversight',
                     'Staff supervision and development',
                     'Performance monitoring and reporting'
                 ],
-                'Claims Processor': [
+                'Claims_Processor': [
                     'Process insurance claims',
                     'Verify claim documentation',
                     'Calculate claim settlements',
                     'Maintain claims database'
                 ],
-                'Insurance Adjuster': [
+                'Adjuster': [
                     'Investigate insurance claims',
                     'Assess damages and losses',
                     'Determine claim validity',
@@ -334,7 +404,12 @@ export const useUserStore = defineStore('users', {
                 ]
             }
             
-            return responsibilities[role] || []
+            roles.forEach(role => {
+                const roleResponsibilities = responsibilities[role] || []
+                roleResponsibilities.forEach(resp => allResponsibilities.add(resp))
+            })
+            
+            return Array.from(allResponsibilities)
         },
 
         async forgotPassword(form, setStatus, setErrors, processing) {

@@ -13,6 +13,6 @@ public record LoginRequestDTO(
 //                message = "Password must have at least 8 characters, including uppercase, lowercase, number, and special character"
 //        )
         String password,
-        Boolean remember
+        Boolean rememberMe
 ) {
 }

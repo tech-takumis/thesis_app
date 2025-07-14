@@ -5,9 +5,8 @@ import com.hashjosh.agripro.insurance.dto.InsuranceTypeResponseDto;
 import com.hashjosh.agripro.insurance.mappers.InsuranceTypeMapper;
 import com.hashjosh.agripro.insurance.models.InsuranceType;
 import com.hashjosh.agripro.insurance.repository.InsuranceTypeRepository;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -42,15 +41,7 @@ public class InsuranceTypeService {
     }
 
 
-    public ResponseEntity<?> findById(Long id) {
-        InsuranceType insuranceType = repository.findById(id).orElse(null);
 
-        if(insuranceType == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return ResponseEntity.ok(mapper.toInsuraceTypeResponseDto(insuranceType));
-    }
 
     public ResponseEntity<?> update(Long id,InsuranceTypeRequestDto dto) {
         InsuranceType insurance = repository.findById(id).orElse(null);
@@ -67,5 +58,9 @@ public class InsuranceTypeService {
 
        return new ResponseEntity<>(mapper.toInsuraceTypeResponseDto(repository.save(updatedInsurance)), HttpStatus.OK);
 
+    }
+
+    public Optional<InsuranceTypeResponseDto> findById(Long id) {
+        return repository.findById(id).map(mapper::toInsuraceTypeResponseDto);
     }
 }

@@ -24,16 +24,22 @@ public class InsuranceApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JsonManagedReference("insurance-application")
-    private InsuranceType insuranceType;
+
     @Column(columnDefinition = "timestamp(6) without time zone")
     private Timestamp createdAt;
     @Column(columnDefinition = "timestamp(6) without time zone")
     private Timestamp updatedAt;
     private Status status;
+    private String coordinate;
 
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> fieldValues;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonManagedReference("insurance-application")
+    private InsuranceType insuranceType; //Type of application used
+
+    @ElementCollection
+    @CollectionTable(name = "application_field_values",
+            joinColumns = @JoinColumn(name = "application_id"))
+    @MapKeyColumn(name = "field_name")
+    @Column(name = "field_value")
+    private Map<String, String> fieldValues; //// Stores submitted field values, mapped by field name
 }

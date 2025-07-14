@@ -1,15 +1,12 @@
 package com.hashjosh.agripro.user.dto;
 
-import com.hashjosh.agripro.user.models.Role;
-import jakarta.validation.constraints.*;
-
 import java.util.Set;
 
-public record AuthenticatedStaffResponseDto(
+public record StaffResponseDto(
         String fullname,
         String email,
         Set<String> roles,
-        Set<String> authorities,
+        Set<String> permissions,
         String gender,
         String contactNumber,
         String civilStatus,
@@ -17,6 +14,5 @@ public record AuthenticatedStaffResponseDto(
         String position,
         String department,
         String location
-
 ) {
 }

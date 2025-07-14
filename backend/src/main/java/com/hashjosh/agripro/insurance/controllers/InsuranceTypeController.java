@@ -6,6 +6,8 @@ import com.hashjosh.agripro.insurance.mappers.InsuranceTypeMapper;
 import com.hashjosh.agripro.insurance.models.InsuranceType;
 import com.hashjosh.agripro.insurance.services.InsuranceTypeService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,21 @@ public class InsuranceTypeController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<InsuranceTypeResponseDto>> getAll(){
-        return new ResponseEntity<>(insuranceTypeService.getAll(), HttpStatus.FOUND);
+    public ResponseEntity<?> getAll(
+            @RequestParam(required = false)
+            @Positive(message = "ID must be a positive number")
+            Long id
+    ){
+
+        if (id != null) {
+            Optional<InsuranceTypeResponseDto> result = insuranceTypeService.findById(id);
+            return result.map(ResponseEntity::ok).orElseGet(()-> ResponseEntity.notFound().build());
+
+        }
+
+        List<InsuranceTypeResponseDto> results =  insuranceTypeService.getAll();
+
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
     @PostMapping
@@ -33,10 +48,6 @@ public class InsuranceTypeController {
         return new ResponseEntity<>(insuranceTypeService.savedInsurance(dto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id){
-        return insuranceTypeService.findById(id);
-    }
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody @Valid InsuranceTypeRequestDto dto){
         return  insuranceTypeService.update(id,dto);

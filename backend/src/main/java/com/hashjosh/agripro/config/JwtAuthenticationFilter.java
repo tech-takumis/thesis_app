@@ -12,7 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -44,10 +43,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (jwt != null && jwtUtil.validateToken(jwt)) {
             String username = jwtUtil.getUsernameFromToken(jwt);
             Claims claims = jwtUtil.getAllClaimsFromToken(jwt);
-            String role  = claims.get("role", String.class);
+            List<String> roles  = claims.get("roles", List.class);
+            List<String> permissions = claims.get("permissions", List.class);
+            System.out.println("Claim roles in JwtAuthenticationFilter class:::: " + roles);
+            System.out.println("Claim permissions in JwtAuthenticationFilter class:::: " + permissions);
 
-            if(role != null){
+            for (String role : roles) {
+
                 authorities.add(new SimpleGrantedAuthority(role));
+            }
+
+            for (String permission: permissions){
+                authorities.add(new SimpleGrantedAuthority(permission));
             }
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
