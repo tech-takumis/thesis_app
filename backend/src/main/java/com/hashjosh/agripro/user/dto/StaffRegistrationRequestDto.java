@@ -27,8 +27,12 @@ public record StaffRegistrationRequestDto(
         String department,
         @NotBlank(message = "Location is required!")
         String location,
+<<<<<<< HEAD
 
         String role
+=======
+        Set<RoleDto> roles
+>>>>>>> 72def33b0e42a22aad3bdf2d88dfad25e8960d0d
 
 ) {
 }

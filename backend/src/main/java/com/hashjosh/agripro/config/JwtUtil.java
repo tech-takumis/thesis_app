@@ -37,6 +37,7 @@ public class JwtUtil {
         System.out.println("Claim roles in JwtUtl class:::: " + roles);
         System.out.println("Claim permissions in JwtUtl class:::: " + authorities);
 
+
         return  Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())

@@ -17,7 +17,6 @@ public class StaffProfile {
     private String position;
     private String department;
     private String location;
-
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
     @JsonBackReference("user-staff")

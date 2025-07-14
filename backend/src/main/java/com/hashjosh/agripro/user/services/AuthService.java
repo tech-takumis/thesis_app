@@ -38,9 +38,9 @@ public class AuthService {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
 
-        if(user.getStaffProfile() == null){
-            throw new IllegalStateException("Staff not found!");
-        }
+//        if(user.getStaffProfile() == null){
+//            throw new IllegalStateException("Staff not found!");
+//        }
 
         int expiry = rememberMe ? 60 * 60 * 24 *30 : -1;
 

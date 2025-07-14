@@ -44,7 +44,7 @@ public class AuthController {
            AuthService.LoginResult result = authService.login(
                    loginRequest.username(),
                    loginRequest.password(),
-                   loginRequest.remember()
+                   loginRequest.rememberMe()
            );
 
            Cookie jwtCookie = new Cookie("jwt", result.jwt());
@@ -69,7 +69,7 @@ public class AuthController {
             AuthService.LoginResult result = authService.login(
                     loginRequest.username(),
                     loginRequest.password(),
-                    loginRequest.remember()
+                    loginRequest.rememberMe()
             );
 
             return ResponseEntity.ok(Map.of("message", "Login successful", "jwt", result.jwt()));

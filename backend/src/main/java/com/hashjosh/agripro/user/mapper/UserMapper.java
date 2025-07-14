@@ -90,9 +90,14 @@ public class UserMapper {
                 .build();
     }
 
+<<<<<<< HEAD
 
     private Set<Authority> getAuthoritiesFromRequest(RoleRequestDto roleRequestDto) {
         return roleRequestDto.authorities().stream().map(
+=======
+    private Set<Authority> getAuthoritiesFromRequest(RoleDto roleDto) {
+        return roleDto.authorities().stream().map(
+>>>>>>> 72def33b0e42a22aad3bdf2d88dfad25e8960d0d
                 this::getOrCreateAuthority
         ).collect(Collectors.toSet());
     }
