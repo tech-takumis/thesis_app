@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../business_logic/registration_manager.dart';
+import 'package:get/get.dart';
+import '../../controllers/registration_controller.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
-import '../../data/models/registration_response.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -15,56 +15,20 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _referenceNumberController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
-  String? _successMessage;
-  RegistrationResponse? _registrationResult;
+  final RegistrationController _registrationController = Get.put(
+    RegistrationController(),
+  );
 
   @override
   void dispose() {
     _referenceNumberController.dispose();
+    Get.delete<RegistrationController>();
     super.dispose();
   }
 
-  Future<void> _register() async {
+  void _register() {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _successMessage = null;
-      _registrationResult = null;
-    });
-
-    try {
-      final response = await RegistrationManager.register(
-        _referenceNumberController.text.trim(),
-      );
-
-      setState(() {
-        _registrationResult = response;
-        if (response.success) {
-          _successMessage = response.displayMessage;
-          _errorMessage = null;
-        } else {
-          _errorMessage = response.displayMessage;
-          _successMessage = null;
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-        _successMessage = null;
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _goToLogin() {
-    Navigator.of(context).pop(); // Go back to login page
+    _registrationController.register(_referenceNumberController.text.trim());
   }
 
   @override
@@ -77,7 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Get.back(),
         ),
       ),
       body: SafeArea(
@@ -167,11 +131,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     LengthLimitingTextInputFormatter(15),
                   ],
                   onChanged: (value) {
-                    // Auto-format the RSBSA ID as user types
                     if (value.length >= 3 &&
                         !value.contains('-') &&
                         value.length <= 6) {
-                      final formatted = RegistrationManager.formatRsbsaId(
+                      final formatted = RegistrationController.formatRsbsaId(
                         value,
                       );
                       if (formatted != value) {
@@ -188,7 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your RSBSA Reference Number';
                     }
-                    if (!RegistrationManager.isValidRsbsaId(value)) {
+                    if (!RegistrationController.isValidRsbsaId(value)) {
                       return 'Please enter a valid RSBSA Reference Number';
                     }
                     return null;
@@ -197,8 +160,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 32),
 
                 // Success Message
-                if (_successMessage != null && _registrationResult != null)
-                  Container(
+                Obx(() {
+                  if (_registrationController.successMessage.isEmpty)
+                    return const SizedBox.shrink();
+
+                  return Container(
                     padding: const EdgeInsets.all(16),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
@@ -228,52 +194,63 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.green[200]!),
+                        if (_registrationController
+                                .registrationResult
+                                ?.username !=
+                            null) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.green[200]!),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Your Username:',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _registrationController
+                                      .registrationResult!
+                                      .username!,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  '📧 Your login credentials have been sent to your registered email address.',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.green[700],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Your Username:',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _registrationResult!.username ?? 'N/A',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'monospace',
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                '📧 Your login credentials have been sent to your registered email address.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.green[700],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ],
                     ),
-                  ),
+                  );
+                }),
 
                 // Error Message
-                if (_errorMessage != null)
-                  Container(
+                Obx(() {
+                  if (_registrationController.errorMessage.isEmpty)
+                    return const SizedBox.shrink();
+
+                  return Container(
                     padding: const EdgeInsets.all(16),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
@@ -291,64 +268,79 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            _errorMessage!,
+                            _registrationController.errorMessage,
                             style: TextStyle(
                               color: Colors.red[700],
                               fontSize: 14,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-
-                // Register Button or Success Actions
-                if (_registrationResult?.success == true)
-                  Column(
-                    children: [
-                      CustomButton(
-                        onPressed: _goToLogin,
-                        backgroundColor: Colors.green,
-                        child: const Text(
-                          'Go to Login',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        IconButton(
+                          onPressed: _registrationController.clearMessages,
+                          icon: Icon(
+                            Icons.close,
+                            color: Colors.red[700],
+                            size: 16,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _registrationResult = null;
-                            _successMessage = null;
-                            _errorMessage = null;
-                            _referenceNumberController.clear();
-                          });
-                        },
-                        child: const Text('Register Another Account'),
-                      ),
-                    ],
-                  )
-                else
-                  CustomButton(
-                    onPressed: _isLoading ? null : _register,
-                    isLoading: _isLoading,
-                    child: const Text(
-                      'Create Account',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      ],
                     ),
-                  ),
+                  );
+                }),
+
+                // Register Button or Success Actions
+                Obx(() {
+                  if (_registrationController.registrationResult?.success ==
+                      true) {
+                    return Column(
+                      children: [
+                        CustomButton(
+                          onPressed: () => Get.offAllNamed('/login'),
+                          backgroundColor: Colors.green,
+                          child: const Text(
+                            'Go to Login',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () {
+                            _registrationController.clearMessages();
+                            _referenceNumberController.clear();
+                          },
+                          child: const Text('Register Another Account'),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return CustomButton(
+                      onPressed:
+                          _registrationController.isLoading ? null : _register,
+                      isLoading: _registrationController.isLoading,
+                      child: const Text(
+                        'Create Account',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  }
+                }),
 
                 const SizedBox(height: 24),
 
                 // Back to Login Link
-                if (_registrationResult?.success != true)
-                  Row(
+                Obx(() {
+                  if (_registrationController.registrationResult?.success ==
+                      true) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
@@ -356,7 +348,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       GestureDetector(
-                        onTap: _goToLogin,
+                        onTap: () => Get.back(),
                         child: Text(
                           'Sign in here',
                           style: TextStyle(
@@ -366,7 +358,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ],
-                  ),
+                  );
+                }),
               ],
             ),
           ),
