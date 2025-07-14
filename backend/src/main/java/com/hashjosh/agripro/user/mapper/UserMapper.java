@@ -1,17 +1,18 @@
 package com.hashjosh.agripro.user.mapper;
 
 import com.hashjosh.agripro.authority.Authority;
+import com.hashjosh.agripro.authority.AuthorityRepository;
 import com.hashjosh.agripro.role.Role;
-import com.hashjosh.agripro.rsbsa.RsbsaModel;
+import com.hashjosh.agripro.role.RoleRepository;
 import com.hashjosh.agripro.role.dtos.RoleRequestDto;
+import com.hashjosh.agripro.rsbsa.RsbsaModel;
 import com.hashjosh.agripro.user.dto.AuthorityDto;
 import com.hashjosh.agripro.user.dto.RoleDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffResponseDto;
-import com.hashjosh.agripro.user.models.*;
-import com.hashjosh.agripro.authority.AuthorityRepository;
-import com.hashjosh.agripro.role.RoleRepository;
-
+import com.hashjosh.agripro.user.models.FarmerProfile;
+import com.hashjosh.agripro.user.models.StaffProfile;
+import com.hashjosh.agripro.user.models.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
