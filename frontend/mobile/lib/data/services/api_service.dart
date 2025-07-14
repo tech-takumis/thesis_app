@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mobile/data/models/registration_request.dart';
+import 'package:mobile/data/models/registration_response.dart';
 import '../models/auth_response.dart';
 import '../models/login_request.dart';
 
@@ -9,17 +11,9 @@ class ApiService {
   // For Android Emulator:
   static const String baseUrl = 'http://127.0.0.1:8000';
 
-  // For iOS Simulator:
-  // static const String baseUrl = 'http://127.0.0.1:8000';
-
-  // For real device (replace with your computer's IP):
-  // static const String baseUrl = 'http://192.168.1.XXX:8000';
-
   static Future<AuthResponse> login(LoginRequest request) async {
     try {
       final url = '$baseUrl/mobile/login';
-      // print('Attempting to connect to: $url');
-      // print('Request body: ${jsonEncode(request.toJson())}');
 
       final response = await http
           .post(
@@ -39,10 +33,6 @@ class ApiService {
             },
           );
 
-      // print('Response status: ${response.statusCode}');
-      // print('Response headers: ${response.headers}');
-      // print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         return AuthResponse.fromJson(responseData);
@@ -59,31 +49,104 @@ class ApiService {
         );
       }
     } catch (e) {
-      print('API Error Details: $e');
-
-      // if (e.toString().contains('Connection refused') ||
-      //     e.toString().contains('SocketException')) {
-      //   return AuthResponse(
-      //     message:
-      //         'Cannot connect to server at $baseUrl. Please check:\n• Server is running\n• Correct IP address\n• Network connection',
-      //     success: false,
-      //   );
-      // } else if (e.toString().contains('timeout')) {
-      //   return AuthResponse(
-      //     message: 'Server is taking too long to respond. Please try again.',
-      //     success: false,
-      //   );
-      // } else if (e.toString().contains('FormatException')) {
-      //   return AuthResponse(
-      //     message: 'Invalid response from server. Please check server logs.',
-      //     success: false,
-      //   );
-      // } else {
       return AuthResponse(
         message: 'Network error: ${e.toString()}',
         success: false,
       );
-      // }
+    }
+  }
+
+  // static Future<RegistrationResponse> register(
+  //   RegistrationRequest request,
+  // ) async {
+  //   try {
+  //     final url = '$baseUrl/api/v1/register/farmers';
+  //     final response = await http
+  //         .post(
+  //           Uri.parse(url),
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             'Accept': 'application/json',
+  //           },
+  //           body: jsonEncode(request.toJson()),
+  //         )
+  //         .timeout(
+  //           const Duration(seconds: 15),
+  //           onTimeout: () {
+  //             throw Exception('Server timeout - please try again');
+  //           },
+  //         );
+
+  //     final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       return RegistrationResponse.fromJson(responseData);
+  //     } else if (response.statusCode == 400) {
+  //       return RegistrationResponse.fromJson(responseData);
+  //     } else {
+  //       return RegistrationResponse(
+  //         success: false,
+  //         error: 'Server error (${response.statusCode})',
+  //         message: responseData['message'] ?? 'Registration failed',
+  //       );
+  //     }
+  //   } catch (e) {
+  //     return RegistrationResponse(
+  //       success: false,
+  //       error: 'Network Error',
+  //       message: 'An unexpected error occurred. Please try again.',
+  //     );
+  //   }
+  // }
+  static Future<RegistrationResponse> register(
+    RegistrationRequest request,
+  ) async {
+    try {
+      final url =
+          '$baseUrl/api/v1/register/farmers'; // Adjust endpoint as needed
+
+      print('🚀 Attempting registration to: $url');
+      print('📤 Request body: ${jsonEncode(request.toJson())}');
+
+      final response = await http
+          .post(
+            Uri.parse(url),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              throw Exception('Server timeout - please try again');
+            },
+          );
+
+      print('📥 Registration response status: ${response.statusCode}');
+      print('📥 Registration response body: ${response.body}');
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return RegistrationResponse.fromJson(responseData);
+      } else if (response.statusCode == 400) {
+        return RegistrationResponse.fromJson(responseData);
+      } else {
+        return RegistrationResponse(
+          success: false,
+          error: 'Server error (${response.statusCode})',
+          message: responseData['message'] ?? 'Registration failed',
+        );
+      }
+    } catch (e) {
+      print('🚨 Registration API Error: $e');
+      return RegistrationResponse(
+        success: false,
+        error: 'Network Error',
+        message: 'An unexpected error occurred. Please try again.',
+      );
     }
   }
 }
