@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleGeneralException(Exception ex) {
         return ResponseEntity.status(500)
                 .body(Map.of("message", "Internal server error"));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleIllegalStateException(IllegalStateException ex) {
+        return new ResponseEntity<>(Map.of(
+            "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.BAD_REQUEST,
+                "error", " Bad request",
+                "message", ex.getMessage()
+
+        ),HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

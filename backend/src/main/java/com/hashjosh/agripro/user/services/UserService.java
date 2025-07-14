@@ -68,17 +68,15 @@ public class UserService {
     @Transactional
     public User registerFarmer(FarmerRegistrationRequestDto dto) throws MessagingException {
 
-        RsbsaModel rsbsa = rsbsaRepository.findByRsbsaIdEqualsIgnoreCase(dto.rsbsaId())
-                .orElseThrow(() -> new EntityNotFoundException("RSBSA ID not found: " + dto.rsbsaId()));
+        RsbsaModel rsbsa = rsbsaRepository.findByRsbsaIdEqualsIgnoreCase(dto.referenceNumber())
+                .orElseThrow(() -> new EntityNotFoundException("RSBSA ID not found: " + dto.referenceNumber()));
 
-        if (userRepository.existsByUsername(dto.rsbsaId())) {
+        if (userRepository.existsByUsername(dto.referenceNumber())) {
             throw new IllegalStateException("User with this RSBSA ID already exists.");
         }
-        if (userRepository.existsByEmail(dto.email())) {
-            throw new IllegalStateException("User with this email already exists.");
-        }
-
-
+//        if (userRepository.existsByEmail(dto.email())) {
+//            throw new IllegalStateException("User with this email already exists.");
+//        }
 
         Set<Role> roles = Collections.singleton(roleRepository.findByName("Farmers")
                 .orElseThrow(() -> new UserRoleNotFoundException("User role farmer does not exist, please try again")));
