@@ -5,7 +5,6 @@ import com.hashjosh.agripro.role.Role;
 import com.hashjosh.agripro.user.dto.StaffResponseDto;
 import com.hashjosh.agripro.user.models.User;
 import org.springframework.stereotype.Component;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 

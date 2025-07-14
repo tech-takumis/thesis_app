@@ -4,11 +4,14 @@ import com.hashjosh.agripro.authority.Authority;
 import com.hashjosh.agripro.role.Role;
 import com.hashjosh.agripro.rsbsa.RsbsaModel;
 import com.hashjosh.agripro.role.dtos.RoleRequestDto;
+import com.hashjosh.agripro.user.dto.AuthorityDto;
+import com.hashjosh.agripro.user.dto.RoleDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffResponseDto;
 import com.hashjosh.agripro.user.models.*;
 import com.hashjosh.agripro.authority.AuthorityRepository;
 import com.hashjosh.agripro.role.RoleRepository;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -90,14 +93,10 @@ public class UserMapper {
                 .build();
     }
 
-<<<<<<< HEAD
 
     private Set<Authority> getAuthoritiesFromRequest(RoleRequestDto roleRequestDto) {
         return roleRequestDto.authorities().stream().map(
-=======
-    private Set<Authority> getAuthoritiesFromRequest(RoleDto roleDto) {
-        return roleDto.authorities().stream().map(
->>>>>>> 72def33b0e42a22aad3bdf2d88dfad25e8960d0d
+
                 this::getOrCreateAuthority
         ).collect(Collectors.toSet());
     }
@@ -130,4 +129,21 @@ public class UserMapper {
                 user.getCivilStatus(),user.getAddress(),user.getStaffProfile().getPosition(),
                 user.getStaffProfile().getDepartment(),user.getStaffProfile().getLocation());
     }
+
+    private Authority getOrCreateAuthority(AuthorityDto authorityDto) {
+        return authorityRepository.findByName(authorityDto.name()).orElseGet(() -> authorityRepository.save(
+                Authority.builder()
+                        .name(authorityDto.name())
+                        .build()
+        ));
+    }
+
+    private Role getOrCreateRole(RoleDto roleDto) {
+        return roleRepository.findByName(roleDto.name()).orElseGet(() -> roleRepository.save(
+                Role.builder()
+                        .name(roleDto.name())
+                        .build()
+        ));
+    }
+
 }

@@ -61,6 +61,7 @@ public class AuthService {
     }
     public StaffResponseDto authenticatedUser(String username) {
 
+
         return userRepository.findByUsername(username)
                 .map(mapper::toAuthenticatedDto)
                 .orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));

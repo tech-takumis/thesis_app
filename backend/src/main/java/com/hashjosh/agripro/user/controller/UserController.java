@@ -2,7 +2,9 @@ package com.hashjosh.agripro.user.controller;
 
 import com.hashjosh.agripro.user.dto.FarmerRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
+
 import com.hashjosh.agripro.user.dto.StaffResponseDto;
+
 import com.hashjosh.agripro.user.models.User;
 import com.hashjosh.agripro.user.services.UserService;
 import jakarta.mail.MessagingException;
@@ -68,9 +70,5 @@ public class UserController {
             throw new EntityNotFoundException("User with id " + id + " not found");
         }
     }
-
-
-
-
 
 }

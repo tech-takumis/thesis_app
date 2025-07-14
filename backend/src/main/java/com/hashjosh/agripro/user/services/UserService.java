@@ -79,10 +79,12 @@ public class UserService {
         }
 
 
+
         Set<Role> roles = Collections.singleton(roleRepository.findByName("Farmers")
                 .orElseThrow(() -> new UserRoleNotFoundException("User role farmer does not exist, please try again")));
 
         User farmer = mapper.rsbsaToFarmer(rsbsa, roles);
+
         var savedFarmer = userRepository.save(farmer);
 
         FarmerProfile farmerProfile = mapper.rsbsaToFarmerProfile(rsbsa, savedFarmer);
@@ -93,6 +95,7 @@ public class UserService {
 
         return savedFarmer;
     }
+
 
     public void deleteUser(int id) {
 
@@ -120,5 +123,6 @@ public class UserService {
     public StaffResponseDto findUser(int id) {
         User  user = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return mapper.toStaffResponse(user);
+
     }
 }

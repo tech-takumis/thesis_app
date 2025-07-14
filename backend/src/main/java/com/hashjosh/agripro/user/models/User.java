@@ -1,7 +1,9 @@
 package com.hashjosh.agripro.user.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import com.hashjosh.agripro.role.Role;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,11 +43,13 @@ public class User {
     private StaffProfile staffProfile;
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_Id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
+
     private Set<Role> roles;
 }

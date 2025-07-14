@@ -31,11 +31,13 @@ public class JwtUtil {
     public String generateToken(String username, List<String> roles, List<String> authorities) {
         Map<String, Object> claims = new HashMap<>();
 
+
        claims.put("roles", roles);
        claims.put("permissions", authorities);
 
         System.out.println("Claim roles in JwtUtl class:::: " + roles);
         System.out.println("Claim permissions in JwtUtl class:::: " + authorities);
+
 
 
         return  Jwts.builder()
