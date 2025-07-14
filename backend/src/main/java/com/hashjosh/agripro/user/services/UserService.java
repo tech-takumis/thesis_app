@@ -74,11 +74,9 @@ public class UserService {
         if (userRepository.existsByUsername(dto.rsbsaId())) {
             throw new IllegalStateException("User with this RSBSA ID already exists.");
         }
-        if (userRepository.existsByEmail(dto.email())) {
-            throw new IllegalStateException("User with this email already exists.");
-        }
-
-
+//        if (userRepository.existsByEmail(dto.email())) {
+//            throw new IllegalStateException("User with this email already exists.");
+//        }
 
         Set<Role> roles = Collections.singleton(roleRepository.findByName("Farmers")
                 .orElseThrow(() -> new UserRoleNotFoundException("User role farmer does not exist, please try again")));
