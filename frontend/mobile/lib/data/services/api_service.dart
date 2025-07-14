@@ -1,151 +1,139 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:mobile/data/models/registration_request.dart';
-import 'package:mobile/data/models/registration_response.dart';
+// import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:get/get.dart' as getx;
 import '../models/auth_response.dart';
 import '../models/login_request.dart';
+import '../models/registration_request.dart';
+import '../models/registration_response.dart';
 
-class ApiService {
-  // Choose the correct URL based on your testing environment:
+class ApiService extends getx.GetxService {
+  late Dio _dio;
+  static const String baseUrl = 'http://localhost:8000';
 
-  // For Android Emulator:
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  static ApiService get to => getx.Get.find();
 
-  static Future<AuthResponse> login(LoginRequest request) async {
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeDio();
+  }
+
+  void _initializeDio() {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 15),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    // Add interceptors for logging
+    _dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        requestHeader: true,
+        responseHeader: false,
+        error: true,
+        logPrint: (obj) => print('🌐 API: $obj'),
+      ),
+    );
+
+    // Add error interceptor
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (error, handler) {
+          handler.next(error);
+        },
+      ),
+    );
+  }
+
+  Future<AuthResponse> login(LoginRequest request) async {
     try {
-      final url = '$baseUrl/mobile/login';
+      final response = await _dio.post('/mobile/login', data: request.toJson());
 
-      final response = await http
-          .post(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode(request.toJson()),
-          )
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () {
-              throw Exception(
-                'Connection timeout - server took too long to respond',
-              );
-            },
-          );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        return AuthResponse.fromJson(responseData);
-      } else if (response.statusCode == 401) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return AuthResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
         return AuthResponse(
-          message: responseData['message'] ?? 'Invalid credentials',
+          message: 'Connection timeout. Please check your network connection.',
+          success: false,
+        );
+      } else if (e.type == DioExceptionType.connectionError) {
+        return AuthResponse(
+          message:
+              'Cannot connect to server. Please check if the server is running on localhost:8000.',
+          success: false,
+        );
+      } else if (e.response?.statusCode == 401 ||
+          e.response?.statusCode == 400) {
+        final errorData = e.response?.data;
+        return AuthResponse(
+          message: errorData['message'] ?? 'Invalid credentials',
           success: false,
         );
       } else {
         return AuthResponse(
-          message: 'Server error (${response.statusCode}): ${response.body}',
+          message:
+              'Server error (${e.response?.statusCode}): ${e.response?.data}',
           success: false,
         );
       }
     } catch (e) {
       return AuthResponse(
-        message: 'Network error: ${e.toString()}',
+        message: 'An unexpected error occurred: ${e.toString()}',
         success: false,
       );
     }
   }
 
-  // static Future<RegistrationResponse> register(
-  //   RegistrationRequest request,
-  // ) async {
-  //   try {
-  //     final url = '$baseUrl/api/v1/register/farmers';
-  //     final response = await http
-  //         .post(
-  //           Uri.parse(url),
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             'Accept': 'application/json',
-  //           },
-  //           body: jsonEncode(request.toJson()),
-  //         )
-  //         .timeout(
-  //           const Duration(seconds: 15),
-  //           onTimeout: () {
-  //             throw Exception('Server timeout - please try again');
-  //           },
-  //         );
-
-  //     final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-  //     if (response.statusCode == 200 || response.statusCode == 201) {
-  //       return RegistrationResponse.fromJson(responseData);
-  //     } else if (response.statusCode == 400) {
-  //       return RegistrationResponse.fromJson(responseData);
-  //     } else {
-  //       return RegistrationResponse(
-  //         success: false,
-  //         error: 'Server error (${response.statusCode})',
-  //         message: responseData['message'] ?? 'Registration failed',
-  //       );
-  //     }
-  //   } catch (e) {
-  //     return RegistrationResponse(
-  //       success: false,
-  //       error: 'Network Error',
-  //       message: 'An unexpected error occurred. Please try again.',
-  //     );
-  //   }
-  // }
-  static Future<RegistrationResponse> register(
-    RegistrationRequest request,
-  ) async {
+  Future<RegistrationResponse> register(RegistrationRequest request) async {
     try {
-      final url =
-          '$baseUrl/api/v1/register/farmers'; // Adjust endpoint as needed
+      final response = await _dio.post(
+        '/api/v1/register/farmers',
+        data: request.toJson(),
+      );
 
-      print('🚀 Attempting registration to: $url');
-      print('📤 Request body: ${jsonEncode(request.toJson())}');
-
-      final response = await http
-          .post(
-            Uri.parse(url),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode(request.toJson()),
-          )
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () {
-              throw Exception('Server timeout - please try again');
-            },
-          );
-
-      print('📥 Registration response status: ${response.statusCode}');
-      print('📥 Registration response body: ${response.body}');
-
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return RegistrationResponse.fromJson(responseData);
-      } else if (response.statusCode == 400) {
-        return RegistrationResponse.fromJson(responseData);
+      return RegistrationResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        return RegistrationResponse(
+          success: false,
+          error: 'Timeout Error',
+          message: 'Connection timeout. Please try again.',
+        );
+      } else if (e.type == DioExceptionType.connectionError) {
+        return RegistrationResponse(
+          success: false,
+          error: 'Connection Error',
+          message:
+              'Cannot connect to server. Please check if the server is running.',
+        );
+      } else if (e.response?.statusCode == 400) {
+        final errorData = e.response?.data;
+        return RegistrationResponse.fromJson(errorData);
       } else {
         return RegistrationResponse(
           success: false,
-          error: 'Server error (${response.statusCode})',
-          message: responseData['message'] ?? 'Registration failed',
+          error: 'Server Error',
+          message: 'Server error (${e.response?.statusCode})',
         );
       }
     } catch (e) {
-      print('🚨 Registration API Error: $e');
       return RegistrationResponse(
         success: false,
-        error: 'Network Error',
-        message: 'An unexpected error occurred. Please try again.',
+        error: 'Unexpected Error',
+        message: 'An unexpected error occurred: ${e.toString()}',
       );
     }
   }

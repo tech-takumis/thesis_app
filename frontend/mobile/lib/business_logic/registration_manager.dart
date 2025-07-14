@@ -5,7 +5,7 @@ import '../data/services/api_service.dart';
 class RegistrationManager {
   static Future<RegistrationResponse> register(String referenceNumber) async {
     final request = RegistrationRequest(referenceNumber: referenceNumber);
-    final response = await ApiService.register(request);
+    final response = await ApiService.to.register(request);
     return response;
   }
 

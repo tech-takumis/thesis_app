@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../business_logic/auth_manager.dart';
+import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AuthController authController = Get.find<AuthController>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await AuthManager.logout();
-              if (context.mounted) {
-                Navigator.of(context).pushReplacementNamed('/login');
-              }
-            },
+            onPressed: authController.logout,
           ),
         ],
       ),

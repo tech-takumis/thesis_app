@@ -12,18 +12,18 @@ class AuthManager {
     final request = LoginRequest(
       username: username,
       password: password,
-      rememberMe: rememberMe,
+      rememberMe: rememberMe, // Pass the remember parameter to backend
     );
-    final response = await ApiService.login(request);
+    final response = await ApiService.to.login(request);
 
     if (response.success && response.jwt != null) {
-      await StorageService.saveToken(response.jwt!);
-      await StorageService.saveRememberMe(rememberMe);
+      await StorageService.to.saveToken(response.jwt!);
+      await StorageService.to.saveRememberMe(rememberMe);
 
       if (rememberMe) {
-        await StorageService.saveCredentials(username, password);
+        await StorageService.to.saveCredential(username, password);
       } else {
-        await StorageService.clearCredentials();
+        await StorageService.to.clearAllCredentials();
       }
     }
 
@@ -31,20 +31,20 @@ class AuthManager {
   }
 
   static Future<void> logout() async {
-    await StorageService.removeToken();
-    await StorageService.clearCredentials();
-    await StorageService.saveRememberMe(false);
+    await StorageService.to.removeToken();
+    await StorageService.to.clearAllCredentials();
+    await StorageService.to.saveRememberMe(false);
   }
 
   static Future<bool> isLoggedIn() async {
-    final token = await StorageService.getToken();
+    final token = StorageService.to.getToken();
     return token != null && token.isNotEmpty;
   }
 
   static Future<Map<String, String?>> getSavedCredentials() async {
-    final rememberMe = await StorageService.getRememberMe();
+    final rememberMe = StorageService.to.getRememberMe();
     if (rememberMe) {
-      return await StorageService.getCredentials();
+      return await StorageService.to.getCredentials();
     }
     return {'username': null, 'password': null};
   }
