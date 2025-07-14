@@ -49,7 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("Claim permissions in JwtAuthenticationFilter class:::: " + permissions);
 
             for (String role : roles) {
-
                 authorities.add(new SimpleGrantedAuthority(role));
             }
 

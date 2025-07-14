@@ -72,7 +72,6 @@ public class AuthController {
                     loginRequest.username(),
                     loginRequest.password(),
                     loginRequest.rememberMe()
-
             );
 
             return ResponseEntity.ok(Map.of("message", "Login successful", "jwt", result.jwt()));
