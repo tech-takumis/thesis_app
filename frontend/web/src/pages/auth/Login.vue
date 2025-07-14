@@ -126,7 +126,7 @@
             <div class="flex items-center">
               <input
                 id="remember"
-                v-model="form.remember"
+                v-model="form.rememberMe"
                 type="checkbox"
                 class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                 :disabled="processing"
@@ -182,7 +182,7 @@ const store = useUserStore()
 const form = ref({
   username: '',
   password: '',
-  remember: false,
+  rememberMe: false,
 })
 
 const processing = ref(false)
