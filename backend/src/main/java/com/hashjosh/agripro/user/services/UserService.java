@@ -19,12 +19,15 @@ import com.hashjosh.agripro.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.RoleNotFoundException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class UserService {
@@ -47,51 +50,39 @@ public class UserService {
         this.service = service;
     }
 
+
     @Transactional
-    public String registerStaff(StaffRegistrationRequestDto dto) throws MessagingException {
+    @Async
+    public CompletableFuture<String> registerStaff(StaffRegistrationRequestDto dto) throws MessagingException {
 
         Set<Role> roles = Collections.singleton(roleRepository.findByName(dto.role())
-                .orElseThrow(() -> new UserRoleNotFoundException("User role: "+dto.role() + "not found")));
+                .orElseThrow(() -> new UserRoleNotFoundException(String.format("Role %s not found", dto.role()))));
 
-        User user  = mapper.toRegisterStaff(dto, roles);
-        var savedStaff = userRepository.save(user);
+        User user = userRepository.save(mapper.toRegisterStaff(dto, roles));
 
-        StaffProfile profile = mapper.toRegisterStaffProfileDto(dto, savedStaff);
+        StaffProfile staffProfile = staffProfileRepository.save(mapper.toRegisterStaffProfileDto(dto, user));
 
-        staffProfileRepository.save(profile);
-
-        service.sendStaffRegistrationMail(savedStaff);
-
-        return "Staff " + savedStaff.getUsername() + "created successfully";
+        service.sendStaffRegistrationMail(user);
+        return CompletableFuture.completedFuture(String.format("Staff %s created successfully", user));
     }
 
     @Transactional
-    public User registerFarmer(FarmerRegistrationRequestDto dto) throws MessagingException {
-
+    @Async
+    public CompletableFuture<User> registerFarmer(FarmerRegistrationRequestDto dto) throws MessagingException {
         RsbsaModel rsbsa = rsbsaRepository.findByRsbsaIdEqualsIgnoreCase(dto.referenceNumber())
-                .orElseThrow(() -> new EntityNotFoundException("RSBSA ID not found: " + dto.referenceNumber()));
-
-        if (userRepository.existsByUsername(dto.referenceNumber())) {
-            throw new IllegalStateException("User with this RSBSA ID already exists.");
+                .orElseThrow(() -> new EntityNotFoundException(String.format("RSBSA Control No. %s  not found!", dto.referenceNumber())));
+        if(userRepository.findByUsername(dto.referenceNumber()).isPresent()){
+            throw new IllegalStateException(String.format("User with Rsbsa Id: %s already exist!", dto.referenceNumber()));
         }
-//        if (userRepository.existsByEmail(dto.email())) {
-//            throw new IllegalStateException("User with this email already exists.");
-//        }
 
         Set<Role> roles = Collections.singleton(roleRepository.findByName("Farmers")
-                .orElseThrow(() -> new UserRoleNotFoundException("User role farmer does not exist, please try again")));
+                .orElseThrow(() -> new UserRoleNotFoundException(String.format("User with Rsbsa Id: %s not found!", dto.referenceNumber()))));
 
-        User farmer = mapper.rsbsaToFarmer(rsbsa, roles);
+        User farmer = userRepository.save(mapper.rsbsaToFarmer(rsbsa, roles));
+        FarmerProfile farmerProfile = farmerProfileRepository.save(mapper.rsbsaToFarmerProfile(rsbsa, farmer));
+        service.sendFarmerRegistrationMail(farmer, rsbsa, "Farmer registration");
 
-        var savedFarmer = userRepository.save(farmer);
-
-        FarmerProfile farmerProfile = mapper.rsbsaToFarmerProfile(rsbsa, savedFarmer);
-
-        farmerProfileRepository.save(farmerProfile);
-
-        service.sendFarmerRegistrationMail(savedFarmer,rsbsa, "Farmer registration");
-
-        return savedFarmer;
+        return CompletableFuture.completedFuture(farmer);
     }
 
 
