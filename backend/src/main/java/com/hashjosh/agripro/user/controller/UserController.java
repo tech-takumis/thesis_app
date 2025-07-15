@@ -16,22 +16,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1")
 public class UserController {
 
-    private final UserService   userService;
+    private final UserService  userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-//    @PreAuthorize("hasRole('STAFF_ADMIN')")
-    @PostMapping("/register/staffs")
-    public ResponseEntity<String> registerStaff(
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/staffs")
+    public ResponseEntity<CompletableFuture<String>> registerStaff(
             @RequestBody @Valid  StaffRegistrationRequestDto dto
     ) throws MessagingException {
         return ResponseEntity.ok(userService.registerStaff(dto));
@@ -49,14 +50,14 @@ public class UserController {
         return new ResponseEntity<>(userService.updateStaffRole(roleId, id), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/register/farmers")
-    public ResponseEntity<Map<String, Serializable>> registerFarmer(
+    @PostMapping("/farmers")
+    public ResponseEntity<Map<String, Object>> registerFarmer(
             @RequestBody @Valid FarmerRegistrationRequestDto dto
-    ) throws MessagingException {
-        User user  = userService.registerFarmer(dto);
+    ) throws MessagingException, ExecutionException, InterruptedException {
+        CompletableFuture<User> user  = userService.registerFarmer(dto);
         return new ResponseEntity<>(Map.of(
-                "message", "Farmer created sucessfully!",
-                "username", user.getUsername()
+                "message", "Farmer created successfully!",
+                "username", user.get()
         ), HttpStatus.CREATED);
     }
 

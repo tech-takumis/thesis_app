@@ -14,10 +14,8 @@ public record StaffRegistrationRequestDto(
 
         @NotNull(message = "Gender is required")
         @Size(min = 3, max = 50, message = "Gender must be between 3 and 50 characters")
-//        @Pattern(regexp = "^(?i)(MALE|FEMALE)&")
         String gender,
         @NotBlank(message = "Contact number is required")
-//        @Pattern(regexp = "^\\+63\\d{2}-\\d{3}-\\d{4}$")
         String contactNumber,
         @NotBlank(message = "Civil Status is required")
         String civilStatus,

@@ -1,5 +1,6 @@
 package com.hashjosh.agripro.config;
 
+import com.hashjosh.agripro.config.dto.JwtProperties;
 import com.hashjosh.agripro.user.models.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -14,17 +15,16 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
-
-    @Value("${jwt.expiration}")
-    private long expirationTimeMs;
-
+    private final JwtProperties jwtProperties;
     private SecretKey secretKey;
+
+    public JwtUtil(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+    }
 
     @PostConstruct
     public void init() {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.secret().getBytes());
     }
 
 
@@ -44,7 +44,7 @@ public class JwtUtil {
                 .subject(username)
                 .issuedAt(new Date())
                 .claims(claims)
-                .expiration(new Date(System.currentTimeMillis() + expirationTimeMs))
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.expiration()))
                 .signWith(secretKey)
                 .compact();
     }
