@@ -54,9 +54,7 @@ public class UserMapper {
                 .position(dto.position())
                 .department(dto.department())
                 .location(dto.location())
-                .user(User.builder()
-                        .id(user.getId())
-                        .build())
+                .user(user)
                 .build();
     }
 

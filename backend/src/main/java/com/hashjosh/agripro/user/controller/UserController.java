@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.relation.RoleNotFoundException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -30,12 +31,27 @@ public class UserController {
         this.userService = userService;
     }
 
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/staffs")
-    public ResponseEntity<CompletableFuture<String>> registerStaff(
+    public ResponseEntity<Map<String,String>> registerStaff(
             @RequestBody @Valid  StaffRegistrationRequestDto dto
     ) throws MessagingException {
-        return ResponseEntity.ok(userService.registerStaff(dto));
+        userService.registerStaff(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "Staff registered successfully"));
+    }
+
+    @PostMapping("/farmers")
+    public ResponseEntity<Map<String,String>> registerFarmer(
+            @RequestBody @Valid FarmerRegistrationRequestDto dto
+    ) throws MessagingException{
+
+        userService.registerFarmer(dto);
+       return  ResponseEntity.status(HttpStatus.CREATED)
+                       .body(Map.of(
+                               "message", "Farmer created successfully!"
+                       ));
     }
 
     @GetMapping("/users/{id}")
@@ -43,23 +59,14 @@ public class UserController {
         return new ResponseEntity<>(userService.findUser(id), HttpStatus.FOUND);
     }
 
+    // This update staff role
     @PutMapping("/staff/{id}/role/{roleId}")
-    public ResponseEntity<String> updateStaffRole(
+    public ResponseEntity<CompletableFuture<String>> updateStaffRole(
             @PathVariable Long roleId, @PathVariable int id
-            ){
+            ) throws RoleNotFoundException {
         return new ResponseEntity<>(userService.updateStaffRole(roleId, id), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/farmers")
-    public ResponseEntity<Map<String, Object>> registerFarmer(
-            @RequestBody @Valid FarmerRegistrationRequestDto dto
-    ) throws MessagingException, ExecutionException, InterruptedException {
-        CompletableFuture<User> user  = userService.registerFarmer(dto);
-        return new ResponseEntity<>(Map.of(
-                "message", "Farmer created successfully!",
-                "username", user.get()
-        ), HttpStatus.CREATED);
-    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")

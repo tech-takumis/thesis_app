@@ -8,7 +8,7 @@
     <h1>Register User</h1>
     <h4>Here is your credential to login for the paltform.</h4>
     <span><b>Username: <p th:text="${user.getUsername()}"></p></b></span>
-    <span><b>Password: <p th:text="${dateOfBirth}"></p></b></span>
+    <span><b>Password: <p th:text="${user.getFarmerProfile()?.getDateOfBirth()}"></p></b></span>
     <span>Thank you once again for registering in our application,<p th:text="${user.getFullname()}"></p>Pleasant having you here.</span>
 </body>
 </html>
