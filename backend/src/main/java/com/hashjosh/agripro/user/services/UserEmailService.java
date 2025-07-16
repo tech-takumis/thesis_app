@@ -34,6 +34,7 @@ public class UserEmailService {
         context.setVariable("staff", staff);
         String html = templateEngine.process("staff-registration", context);
 
+        helper.setFrom(sendFrom);
         helper.setText(html, true);
         helper.setTo(staff.getEmail());
         helper.setSubject(staff.getUsername());
@@ -41,19 +42,18 @@ public class UserEmailService {
 
     }
 
-    public void sendFarmerRegistrationMail(User user, RsbsaModel rsbsa, String subject) throws MessagingException {
+    public void sendFarmerRegistrationMail(User user) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         Context context = new Context();
 
         context.setVariable("user", user);
-        context.setVariable("dateOfBirth", rsbsa.getDateOfBirth().toString());
         String registerHtml = templateEngine.process("register", context);
 
         helper.setTo(user.getEmail());
         helper.setFrom(sendFrom);
-        helper.setSubject(subject);
+        helper.setSubject("Farmer Registration");
         helper.setText(registerHtml, true);
 
         mailSender.send(message);

@@ -16,26 +16,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/v1")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthService authService;
-    private final AuthorityRepository   authorityRepository;
 
 
-    public AuthController(AuthService authService,
-                          AuthorityRepository authorityRepository) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.authorityRepository = authorityRepository;
     }
 
     @PostMapping("/web/login")
@@ -115,7 +110,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/auth/user")
+    @GetMapping("/auth/users")
     public ResponseEntity<?> user(HttpServletRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

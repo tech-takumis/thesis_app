@@ -38,9 +38,6 @@ public class AuthService {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
 
-//        if(user.getStaffProfile() == null){
-//            throw new IllegalStateException("Staff not found!");
-//        }
 
         int expiry = rememberMe ? 60 * 60 * 24 *30 : -1;
 
@@ -60,8 +57,6 @@ public class AuthService {
         return jwtUtil.generateToken(user.getUsername(),roles, authorities);
     }
     public StaffResponseDto authenticatedUser(String username) {
-
-
         return userRepository.findByUsername(username)
                 .map(mapper::toAuthenticatedDto)
                 .orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
