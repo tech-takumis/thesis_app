@@ -6,7 +6,6 @@ public record InsuranceFieldRequestDto(
         String keyName,
         Datatype fieldType,
         String displayName,
-//        FormField ui_input_type,
         String note,
         boolean is_required,
         Long insurance_type_id,

@@ -26,6 +26,18 @@ const routes = [
       guard: "auth",
       roles: ["Underwriter"],
     },
+    
+  },
+  // New Application Page for Underwriter
+  {
+    path: "/underwriter/applications/new",
+    name: "underwriter-new-application",
+    component: () => import("@/pages/underwriter/applications/NewApplication.vue"),
+    meta: {
+      title: "Create New Application Type",
+      guard: "auth",
+      roles: ["Underwriter", "Admin"], // Admin can also create application types
+    },
   },
 
   // Claims Processor Dashboard
