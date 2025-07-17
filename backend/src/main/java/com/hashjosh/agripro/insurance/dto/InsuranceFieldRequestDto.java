@@ -9,6 +9,10 @@ public record InsuranceFieldRequestDto(
 //        FormField ui_input_type,
         String note,
         boolean is_required,
-        Long insurance_type_id
+        Long insurance_type_id,
+
+        // Optional request for data type equal to file onnly
+        boolean hasCoordinate,
+        String coordinate
 ) {
 }

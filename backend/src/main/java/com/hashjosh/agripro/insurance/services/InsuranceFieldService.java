@@ -3,7 +3,9 @@ package com.hashjosh.agripro.insurance.services;
 import com.hashjosh.agripro.exception.InvalidApplicationException;
 import com.hashjosh.agripro.insurance.dto.InsuranceFieldRequestDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceFieldResponseDto;
+import com.hashjosh.agripro.insurance.enums.Datatype;
 import com.hashjosh.agripro.insurance.mappers.InsuranceFieldMapper;
+import com.hashjosh.agripro.insurance.models.FileMetadata;
 import com.hashjosh.agripro.insurance.models.InsuranceField;
 import com.hashjosh.agripro.insurance.repository.InsuranceFieldRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,13 @@ public class InsuranceFieldService {
     }
 
     public InsuranceFieldResponseDto saveInsuranceField(InsuranceFieldRequestDto field) {
-        InsuranceField insuranceField = mapper.toInsuranceField(field);
+        FileMetadata fileMetadata = null;
+
+        if(field.fieldType() == Datatype.File){
+            fileMetadata = mapper.toFileMetadata(field);
+        }
+
+        InsuranceField insuranceField = mapper.toInsuranceField(field, fileMetadata);
 
         return mapper.toInsuranceFieldResponse(repository.save(insuranceField));
     }

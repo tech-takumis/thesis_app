@@ -2,13 +2,14 @@ package com.hashjosh.agripro.insurance.mappers;
 
 import com.hashjosh.agripro.insurance.dto.InsuranceFieldRequestDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceFieldResponseDto;
+import com.hashjosh.agripro.insurance.models.FileMetadata;
 import com.hashjosh.agripro.insurance.models.InsuranceField;
 import com.hashjosh.agripro.insurance.models.InsuranceType;
 import org.springframework.stereotype.Service;
 
 @Service
 public class InsuranceFieldMapper {
-    public InsuranceField toInsuranceField(InsuranceFieldRequestDto field) {
+    public InsuranceField toInsuranceField(InsuranceFieldRequestDto field, FileMetadata fileMetadata) {
         return InsuranceField.builder()
                 .keyName(field.keyName())
                 .fieldType(field.fieldType())
@@ -20,6 +21,7 @@ public class InsuranceFieldMapper {
                                 .id(field.insurance_type_id())
                                 .build()
                 )
+                .fileMetadata(fileMetadata)
                 .build();
     }
 
@@ -29,5 +31,12 @@ public class InsuranceFieldMapper {
                 save.getNote(),save.is_required(),
                 save.getInsuranceType().getId()
         );
+    }
+
+    public FileMetadata toFileMetadata(InsuranceFieldRequestDto field) {
+        return FileMetadata.builder()
+                .hasCoordinate(field.hasCoordinate())
+                .coordinate(field.coordinate())
+                .build();
     }
 }

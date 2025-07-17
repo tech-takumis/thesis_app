@@ -24,6 +24,9 @@ public class InsuranceField {
     private String note;
     private boolean is_required;
 
+    @Embedded
+    private FileMetadata fileMetadata;
+
    @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "insurance_type_id", referencedColumnName = "id")
    @JsonBackReference("insurance-type")

@@ -19,15 +19,13 @@ import java.util.concurrent.CompletableFuture;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final UserMapper mapper;
     private final UserEmailService service;
     private final InternalUserService internalUserService;
     public UserService(UserRepository userRepository,
-                       RoleRepository roleRepository, UserMapper mapper1,
+                       UserMapper mapper1,
                        UserEmailService service, InternalUserService internalUserService) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.mapper = mapper1;
         this.service = service;
         this.internalUserService = internalUserService;
