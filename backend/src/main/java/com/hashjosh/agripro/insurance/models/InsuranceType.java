@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "insurance_type")
 public class InsuranceType {
 
     @Id
@@ -30,4 +31,7 @@ public class InsuranceType {
     @OneToMany(mappedBy = "insuranceType", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("insurance-type")
     private List<InsuranceField> fields;
+
+    @OneToMany(mappedBy = "insuranceType")
+    private List<InsuranceApplication> applications;
 }

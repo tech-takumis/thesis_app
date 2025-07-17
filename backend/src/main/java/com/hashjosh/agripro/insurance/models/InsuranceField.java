@@ -13,12 +13,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "insurance_fields")
 public class InsuranceField {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String keyName;
+    private String key;
+    @Enumerated(EnumType.STRING)  // <-- Add this!
+    @Column(name = "field_type")
     private Datatype fieldType;
     private String displayName;
     private String note;

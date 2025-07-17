@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ValidatorFactory {
     private static final Map<Datatype, FieldValidatorStrategy> validatorMap = Map.of(
-        Datatype.Text, new TextFieldValidator(),
+            Datatype.Text, new TextFieldValidator(),
             Datatype.Number, new NumberFieldValidator(),
             Datatype.Integer, new IntegerFieldValidator(),
             Datatype.Boolean, new BooleanFieldValidator(),
