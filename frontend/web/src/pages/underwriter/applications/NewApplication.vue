@@ -233,63 +233,16 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft, Plus, Trash2, Loader2, LayoutDashboard, FileText, Shield, Calculator, BarChart3 } from 'lucide-vue-next'
+import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-vue-next'
 import AuthenticatedLayout from '../../../layouts/AuthenticatedLayout.vue'
+import { useApplicationStore } from '@/stores/application'
+import { UNDERWRITER_NAVIGATION, DATA_TYPES } from '@/lib/constants'
 
 const router = useRouter()
+const applicationStore = useApplicationStore()
 
-// Navigation for underwriter role (copied from UnderwriterDashboard for consistency)
-const underwriterNavigation = [
-  {
-    name: 'Dashboard',
-    href: '/underwriter/dashboard',
-    icon: LayoutDashboard
-  },
-  {
-    name: 'Applications',
-    icon: FileText,
-    children: [
-      { name: 'New Applications', href: '/underwriter/applications/new' },
-      { name: 'Pending Review', href: '/underwriter/applications/pending' },
-      { name: 'Approved Applications', href: '/underwriter/applications/approved' },
-      { name: 'Rejected Applications', href: '/underwriter/applications/rejected' }
-    ]
-  },
-  {
-    name: 'Risk Assessment',
-    icon: Shield,
-    children: [
-      { name: 'Risk Factors', href: '/underwriter/risk/factors' },
-      { name: 'Historical Data', href: '/underwriter/risk/history' },
-      { name: 'Geographic Analysis', href: '/underwriter/risk/geo' }
-    ]
-  },
-  {
-    name: 'Guidelines & Tools',
-    icon: Calculator,
-    children: [
-      { name: 'Eligibility Criteria', href: '/underwriter/guidelines/eligibility' },
-      { name: 'Coverage & Premium', href: '/underwriter/guidelines/coverage' },
-      { name: 'Underwriting Manual', href: '/underwriter/guidelines/manual' }
-    ]
-  },
-  {
-    name: 'Reports',
-    href: '/underwriter/reports',
-    icon: BarChart3
-  }
-]
-
-// Data types for application fields
-const dataTypes = [
-  'TEXT',
-  'NUMBER',
-  'DATE',
-  'BOOLEAN',
-  'FILE',
-  'ENUM', // Example: for dropdowns with predefined options
-  'GEOLOCATION', // Example: for coordinates directly
-]
+const underwriterNavigation = UNDERWRITER_NAVIGATION
+const dataTypes = DATA_TYPES
 
 const applicationType = ref({
   displayName: '',
@@ -320,50 +273,18 @@ const removeInsuranceField = (index) => {
 const submitApplication = async () => {
   processing.value = true
   
-  // Construct the data payload based on DTOs
-  const payload = {
-    applicationType: {
-      displayName: applicationType.value.displayName,
-      description: applicationType.value.description,
-      requiredAiAnalyses: applicationType.value.requiredAiAnalyses,
-    },
-    insuranceFields: insuranceFields.value.map(field => {
-      const fieldDto = {
-        keyName: field.keyName,
-        fieldType: field.fieldType,
-        displayName: field.displayName,
-        note: field.note,
-        is_required: field.is_required,
-      }
-      // Add file metadata if fieldType is FILE
-      if (field.fieldType === 'FILE') {
-        fieldDto.hasCoordinate = field.hasCoordinate;
-        if (field.hasCoordinate) {
-          fieldDto.coordinate = field.coordinate;
-        }
-      }
-      return fieldDto
-    }),
-  }
+  const result = await applicationStore.createInsuranceApplication(
+    applicationType.value,
+    insuranceFields.value
+  )
 
-  console.log('Submitting application:', JSON.stringify(payload, null, 2))
-
-  try {
-    // Simulate API call
-    // In a real application, you would send this payload to your Spring Boot backend
-    // await axios.post('/api/insurance-types', payload.applicationType);
-    // Then, if successful, send fields:
-    // await axios.post('/api/insurance-fields', payload.insuranceFields);
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
+  if (result.success) {
     alert('New application type created successfully!')
     router.push('/underwriter/dashboard') // Redirect back to dashboard
-  } catch (error) {
-    console.error('Error creating application type:', error)
-    alert('Failed to create application type. Please check console for details.')
-  } finally {
-    processing.value = false
+  } else {
+    alert(`Failed to create application type: ${result.error?.message || 'Unknown error'}. Please check console for details.`)
   }
+  processing.value = false
 }
 
 const resetForm = () => {
@@ -373,6 +294,7 @@ const resetForm = () => {
     requiredAiAnalyses: false,
   }
   insuranceFields.value = []
+  addInitialField() // Add back the initial field after reset
 }
 
 // Add an initial field when the page loads
@@ -388,5 +310,6 @@ const addInitialField = () => {
   })
 }
 
+// Ensure hooks are called at the top level
 addInitialField()
 </script>

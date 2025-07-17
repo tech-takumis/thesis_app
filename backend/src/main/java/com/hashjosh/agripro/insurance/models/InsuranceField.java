@@ -20,15 +20,13 @@ public class InsuranceField {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String key;
-    @Enumerated(EnumType.STRING)  // <-- Add this!
+    @Enumerated(EnumType.STRING)
     @Column(name = "field_type")
     private Datatype fieldType;
     private String displayName;
     private String note;
     private boolean is_required;
-
-    @Embedded
-    private FileMetadata fileMetadata;
+    private boolean hasCoordinate;
 
    @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "insurance_type_id", referencedColumnName = "id")

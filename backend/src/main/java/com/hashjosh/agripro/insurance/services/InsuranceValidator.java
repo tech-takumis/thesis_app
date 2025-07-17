@@ -17,13 +17,17 @@ public class InsuranceValidator {
         for(InsuranceField field: insuranceType.getFields()) {
             String fieldName = field.getKey();
             String fieldValue = fieldValues.get(fieldName);
+            String coordinate = field.isHasCoordinate() ? fieldValues.get("coordinate") : null;
 
-            System.out.println(">>> VALIDATING APPLICATION <<<");
 
-            System.out.println("=== FIELDS ===");
-            insuranceType.getFields().forEach(f ->
-                    System.out.printf("key=%s, type=%s%n", f.getKey(), f.getFieldType()));
+            if(field.isHasCoordinate() && coordinate == null) {
+                throw  new InvalidApplicationException("Coordinate cannot be null in field " + fieldName);
+            }
 
+//            System.out.println("Insurance field name:: " + fieldName);
+//            System.out.println("Insurance field value:: " + fieldValue);
+//            System.out.println("Insurance field has Coordinate:: "+ field.isHasCoordinate());
+//            System.out.println("Insurance field  coordinate:: "+ coordinate);
 
             if (field.is_required() && (fieldValue == null || fieldName.isBlank())) {
                 throw new InvalidApplicationException("Missing required field: " + fieldName);

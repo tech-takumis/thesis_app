@@ -1,5 +1,6 @@
 package com.hashjosh.agripro.insurance.controllers;
 
+import com.hashjosh.agripro.insurance.dto.ApplicationResponseDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceApplicationRequestDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceRequestDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceResponseDto;
@@ -7,6 +8,8 @@ import com.hashjosh.agripro.insurance.services.ApplicationInsuranceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,12 +34,20 @@ public class InsuranceApplicationController {
     ){
         return new ResponseEntity<>(service.createInsurance(dto), HttpStatus.CREATED);
     }
-    
+
+
     @GetMapping("/insurances/{id}")
     public ResponseEntity<InsuranceResponseDto> findInsurance(
             @PathVariable(required = true) Long id
     ){
         return new ResponseEntity<>(service.findInsurance(id), HttpStatus.FOUND);
+    }
+
+    // Get all insurance application of an authenticated user;
+    @GetMapping("/applications")
+    public ResponseEntity<List<ApplicationResponseDto>> findApplications(
+    ){
+        return new ResponseEntity<>(service.findApplication(), HttpStatus.FOUND);
     }
 
     @DeleteMapping("/insurances/{id}")

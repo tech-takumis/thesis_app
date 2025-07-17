@@ -2,12 +2,14 @@ package com.hashjosh.agripro.user.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import com.hashjosh.agripro.insurance.models.InsuranceApplication;
 import com.hashjosh.agripro.role.Role;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 
@@ -50,6 +52,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_Id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
-
     private Set<Role> roles;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+    @JsonManagedReference("user-applications")
+    private List<InsuranceApplication> applications;
 }
