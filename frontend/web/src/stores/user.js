@@ -132,7 +132,7 @@ export const useUserStore = defineStore("users", {
   actions: {
     async getData() {
       try {
-        const response = await axios.get("/auth/user")
+        const response = await axios.get("/auth/users")
         this.userData = response.data
 
         console.log("User data received:", this.userData)
@@ -167,7 +167,7 @@ export const useUserStore = defineStore("users", {
         await axios.post("/web/login", form.value)
 
         // Then fetch the authenticated user
-        const response = await axios.get("/auth/user")
+        const response = await axios.get("/auth/users")
 
         if (response.status == 200 || response.status == 204) {
           this.userData = response.data
