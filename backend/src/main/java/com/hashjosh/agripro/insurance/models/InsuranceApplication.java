@@ -18,6 +18,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "applications")
 public class InsuranceApplication {
 
     @Id
@@ -30,10 +31,9 @@ public class InsuranceApplication {
     @Column(columnDefinition = "timestamp(6) without time zone")
     private Timestamp updatedAt;
     private Status status;
-    private String coordinate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonManagedReference("insurance-application")
+    @JoinColumn(name = "insurance_type_id", referencedColumnName = "id", nullable = false)
     private InsuranceType insuranceType; //Type of application used
 
     @ElementCollection
