@@ -1,8 +1,10 @@
 package com.hashjosh.agripro.insurance.models;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.hashjosh.agripro.insurance.enums.Status;
+import com.hashjosh.agripro.user.models.User;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,11 +32,17 @@ public class InsuranceApplication {
     private Timestamp createdAt;
     @Column(columnDefinition = "timestamp(6) without time zone")
     private Timestamp updatedAt;
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "insurance_type_id", referencedColumnName = "id", nullable = false)
     private InsuranceType insuranceType; //Type of application used
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
+    @JsonBackReference("user-applications")
+    private User user;
 
     @ElementCollection
     @CollectionTable(name = "application_field_values",
