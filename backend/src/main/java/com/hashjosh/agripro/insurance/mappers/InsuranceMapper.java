@@ -1,15 +1,12 @@
 package com.hashjosh.agripro.insurance.mappers;
 
 import com.github.slugify.Slugify;
-import com.hashjosh.agripro.insurance.dto.ApplicationResponseDto;
-import com.hashjosh.agripro.insurance.dto.InsuranceApplicationRequestDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceRequestDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceResponseDto;
-import com.hashjosh.agripro.insurance.enums.Status;
-import com.hashjosh.agripro.insurance.models.InsuranceApplication;
+import com.hashjosh.agripro.insurance.dto.PaginatedResponseDto;
 import com.hashjosh.agripro.insurance.models.InsuranceField;
 import com.hashjosh.agripro.insurance.models.InsuranceType;
-import com.hashjosh.agripro.user.models.User;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -17,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ApplicationInsuranceMapper {
+public class InsuranceMapper {
 
     public InsuranceType toInsuranceType(InsuranceRequestDto dto) {
         return InsuranceType.builder()
@@ -31,7 +28,6 @@ public class ApplicationInsuranceMapper {
     public List<InsuranceField> requestToInsuranceFields(InsuranceRequestDto dto,
                                                          InsuranceType insuranceType) {
 
-        Slugify slugify;
         return dto.fields().stream().map(
                 field -> InsuranceField.builder()
                         .key(toSlug(field.displayName()))
@@ -45,17 +41,6 @@ public class ApplicationInsuranceMapper {
         ).collect(Collectors.toList());
     }
 
-    public InsuranceApplication toInsuranceApplication(InsuranceApplicationRequestDto dto,
-                                                       InsuranceType  insuranceType,
-                                                       User user) {
-        return InsuranceApplication.builder()
-                .createdAt(new Timestamp(System.currentTimeMillis()))
-                .status(Status.PENDING)
-                .user(user)
-                .insuranceType(insuranceType)
-                .fieldValues(dto.fieldValues())
-                .build();
-    }
 
     public InsuranceResponseDto toInsuranceTypeResponse(InsuranceType insurance) {
         return new InsuranceResponseDto(
@@ -65,14 +50,6 @@ public class ApplicationInsuranceMapper {
         );
     }
 
-
-    public ApplicationResponseDto toApplicationResponse(InsuranceApplication application) {
-        return new ApplicationResponseDto(
-//                toInsuranceTypeResponse(application.getInsuranceType()),
-                application.getStatus().name(),
-                application.getFieldValues()
-        );
-    }
     private String toSlug(String input) {
         return input.toLowerCase()
                 .replaceAll("[^a-z0-9\\s]", "")
@@ -80,4 +57,28 @@ public class ApplicationInsuranceMapper {
                 .replaceAll("\\s+", "-");
     }
 
+    public <T> PaginatedResponseDto<T> wrapPage(Page<T> page,
+                                             String baseUrl) {
+        int pageNumber = page.getNumber(); // 1
+        int pageSize = page.getSize();   // 2
+        int totalPages = page.getTotalPages(); // 2
+        //             1
+        String next = pageNumber + 1 < totalPages
+                ? String.format("%s?page=%d&size=%d", baseUrl, pageNumber + 1, pageSize)
+                : null;
+        String prev = pageNumber > 0
+                ? String.format("%s?page=%d&size=%d", baseUrl, pageNumber - 1, pageSize)
+                : null;
+        return  new PaginatedResponseDto<>(
+                page.getContent(),
+                pageNumber,
+                pageSize,
+                page.getTotalElements(),
+                totalPages,
+                page.isLast(),
+                page.isFirst(),
+                next,
+                prev
+        );
+    }
 }

@@ -1,7 +1,7 @@
 <template>
   <AuthenticatedLayout 
-    :navigation="underwriterNavigation" 
-    role-title="Underwriter Portal"
+    :navigation="adminNavigation" 
+    role-title="Admin Portal"
     page-title="New Application Type"
   >
     <template #header>
@@ -11,7 +11,7 @@
           <p class="text-gray-600">Define the structure and fields for a new insurance application</p>
         </div>
         <router-link 
-          to="/underwriter/dashboard"
+          to="/admin/dashboard"
           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
         >
           <ArrowLeft class="h-4 w-4 mr-2" />
@@ -86,12 +86,12 @@
           </div>
           
           <div class="p-6 space-y-6">
-            <div v-if="insuranceFields.length === 0" class="text-center text-gray-500 py-4">
+            <div v-if="fields.length === 0" class="text-center text-gray-500 py-4">
               No fields added yet. Click "Add New Field" to start.
             </div>
 
             <div 
-              v-for="(field, index) in insuranceFields" 
+              v-for="(field, index) in fields" 
               :key="index" 
               class="relative p-4 border border-gray-200 rounded-md bg-gray-50 space-y-4"
             >
@@ -236,12 +236,12 @@ import { useRouter } from 'vue-router'
 import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-vue-next'
 import AuthenticatedLayout from '../../../layouts/AuthenticatedLayout.vue'
 import { useApplicationStore } from '@/stores/application'
-import { UNDERWRITER_NAVIGATION, DATA_TYPES } from '@/lib/constants'
+import { ADMIN_NAVIGATION, DATA_TYPES } from '@/lib/constants' // Updated import
 
 const router = useRouter()
 const applicationStore = useApplicationStore()
 
-const underwriterNavigation = UNDERWRITER_NAVIGATION
+const adminNavigation = ADMIN_NAVIGATION // Use the imported constant
 const dataTypes = DATA_TYPES
 
 const applicationType = ref({
@@ -250,12 +250,22 @@ const applicationType = ref({
   requiredAiAnalyses: false,
 })
 
-const insuranceFields = ref([])
+const fields = ref([
+  {
+    keyName: '',
+    fieldType: '',
+    displayName: '',
+    note: '',
+    is_required: false,
+    hasCoordinate: false, // Specific to FILE type
+    coordinate: '',       // Specific to FILE type
+  }
+])
 
 const processing = ref(false)
 
 const addInsuranceField = () => {
-  insuranceFields.value.push({
+  fields.value.push({
     keyName: '',
     fieldType: '',
     displayName: '',
@@ -267,7 +277,7 @@ const addInsuranceField = () => {
 }
 
 const removeInsuranceField = (index) => {
-  insuranceFields.value.splice(index, 1)
+  fields.value.splice(index, 1)
 }
 
 const submitApplication = async () => {
@@ -275,12 +285,12 @@ const submitApplication = async () => {
   
   const result = await applicationStore.createInsuranceApplication(
     applicationType.value,
-    insuranceFields.value
+    fields.value
   )
 
   if (result.success) {
     alert('New application type created successfully!')
-    router.push('/underwriter/dashboard') // Redirect back to dashboard
+    router.push('/admin/dashboard') // Redirect back to admin dashboard
   } else {
     alert(`Failed to create application type: ${result.error?.message || 'Unknown error'}. Please check console for details.`)
   }
@@ -293,23 +303,16 @@ const resetForm = () => {
     description: '',
     requiredAiAnalyses: false,
   }
-  insuranceFields.value = []
-  addInitialField() // Add back the initial field after reset
+  fields.value = [
+    {
+      keyName: '',
+      fieldType: '',
+      displayName: '',
+      note: '',
+      is_required: false,
+      hasCoordinate: false, // Specific to FILE type
+      coordinate: '',       // Specific to FILE type
+    }
+  ]
 }
-
-// Add an initial field when the page loads
-const addInitialField = () => {
-  insuranceFields.value.push({
-    keyName: '',
-    fieldType: '',
-    displayName: '',
-    note: '',
-    is_required: false,
-    hasCoordinate: false, // Specific to FILE type
-    coordinate: '',       // Specific to FILE type
-  })
-}
-
-// Ensure hooks are called at the top level
-addInitialField()
 </script>

@@ -1,56 +1,77 @@
 <template>
   <button
-    @click="$emit('click')"
-    :class="[
-      'flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-green-300 transition-all duration-200',
-      'focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2'
-    ]"
+    class="quick-action-button"
+    @click="handleClick"
+    :disabled="disabled"
   >
-    <div :class="[
-      'p-3 rounded-lg mb-3',
-      iconBgColor
-    ]">
-      <component :is="icon" :class="['h-8 w-8', iconColor]" />
+    <div class="quick-action-button__icon">
+      <component :is="icon" v-if="typeof icon === 'function'"/>
+      <component :is="icon" v-else-if="typeof icon === 'object'"/>
+      <span v-else>{{ icon }}</span>
     </div>
-    <h3 class="text-sm font-semibold text-gray-900 text-center">{{ title }}</h3>
-    <p class="text-xs text-gray-500 text-center mt-1">{{ description }}</p>
+    <div class="quick-action-button__label">
+      {{ label }}
+    </div>
   </button>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
-  title: String,
-  description: String,
-  icon: Object,
-  variant: {
+  label: {
     type: String,
-    default: 'default'
-  }
-})
+    required: true,
+  },
+  icon: [Object, Function],
+  onClick: {
+    type: Function,
+    required: true,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-defineEmits(['click'])
+const emit = defineEmits(['click']);
 
-const iconBgColor = computed(() => {
-  const variants = {
-    primary: 'bg-green-100',
-    secondary: 'bg-blue-100',
-    warning: 'bg-yellow-100',
-    danger: 'bg-red-100',
-    default: 'bg-gray-100'
+const handleClick = () => {
+  if (!props.disabled) {
+    props.onClick();
+    emit('click');
   }
-  return variants[props.variant] || variants.default
-})
-
-const iconColor = computed(() => {
-  const variants = {
-    primary: 'text-green-600',
-    secondary: 'text-blue-600',
-    warning: 'text-yellow-600',
-    danger: 'text-red-600',
-    default: 'text-gray-600'
-  }
-  return variants[props.variant] || variants.default
-})
+};
 </script>
+
+<style scoped>
+.quick-action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.quick-action-button:hover {
+  background-color: #f0f0f0;
+}
+
+.quick-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quick-action-button__icon {
+  margin-bottom: 4px;
+}
+
+.quick-action-button__label {
+  font-size: 12px;
+}
+</style>

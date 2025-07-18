@@ -1,4 +1,13 @@
-import { LayoutDashboard, FileText, Shield, Calculator, BarChart3 } from "lucide-vue-next"
+import {
+  LayoutDashboard,
+  FileText,
+  Shield,
+  Calculator,
+  BarChart3,
+  Users,
+  Settings,
+  ClipboardList,
+} from "lucide-vue-next"
 
 // Navigation for underwriter role
 export const UNDERWRITER_NAVIGATION = [
@@ -11,10 +20,10 @@ export const UNDERWRITER_NAVIGATION = [
     name: "Applications",
     icon: FileText,
     children: [
-      { name: "New Applications", href: "/underwriter/applications/new" },
       { name: "Pending Review", href: "/underwriter/applications/pending" },
       { name: "Approved Applications", href: "/underwriter/applications/approved" },
       { name: "Rejected Applications", href: "/underwriter/applications/rejected" },
+      { name: "All Applications", href: "/underwriter/applications/all" }, // Added for completeness
     ],
   },
   {
@@ -42,5 +51,53 @@ export const UNDERWRITER_NAVIGATION = [
   },
 ]
 
+// Navigation for admin role
+export const ADMIN_NAVIGATION = [
+  {
+    name: "Dashboard",
+    href: "/admin/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Staff Management",
+    icon: Users,
+    children: [
+      { name: "Register Staff", href: "/admin/staff/register" },
+      { name: "Manage Staff Accounts", href: "/admin/staff/manage" },
+      { name: "Roles & Permissions", href: "/admin/staff/roles" },
+    ],
+  },
+  {
+    name: "Insurance Management",
+    icon: ClipboardList,
+    children: [
+      { name: "Create Application Type", href: "/admin/applications/new" },
+      { name: "Manage Application Types", href: "/admin/applications/manage" },
+      { name: "View All Applications", href: "/admin/applications/all" },
+    ],
+  },
+  {
+    name: "System Settings",
+    icon: Settings,
+    children: [
+      { name: "General Settings", href: "/admin/settings/general" },
+      { name: "Audit Logs", href: "/admin/settings/audit-logs" },
+      { name: "Database Management", href: "/admin/settings/database" },
+    ],
+  },
+  {
+    name: "Reports & Analytics",
+    icon: BarChart3,
+    children: [
+      { name: "Overall Performance", href: "/admin/reports/overall" },
+      { name: "User Activity", href: "/admin/reports/user-activity" },
+      { name: "Financial Overview", href: "/admin/reports/financial" },
+    ],
+  },
+]
+
 // Data types for application fields
-export const DATA_TYPES = ["Text", "Number", "Boolean", "Timestamp", "File"]
+export const DATA_TYPES = ["Text", "Number", "Timestamp", "Boolean", "File"]
+
+// Available roles for staff registration
+export const STAFF_ROLES = ["Teller", "Admin", "Claims_Processor", "Underwriter"]
