@@ -23,7 +23,7 @@ import { computed } from 'vue'
 const props = defineProps({
   title: String,
   description: String,
-  icon: Object,
+  icon: [Object, Function],
   variant: {
     type: String,
     default: 'default'

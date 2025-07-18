@@ -15,6 +15,28 @@ const routes = [
       roles: ["Admin"],
     },
   },
+  // Register Staff Page for Admin
+  {
+    path: "/admin/staff/register",
+    name: "admin-register-staff",
+    component: () => import("@/pages/admin/staff/RegisterStaff.vue"),
+    meta: {
+      title: "Register New Staff",
+      guard: "auth",
+      roles: ["Admin"],
+    },
+  },
+  // Create New Application Type Page for Admin
+  {
+    path: "/admin/applications/new",
+    name: "admin-new-application",
+    component: () => import("@/pages/admin/applications/NewApplication.vue"), // Component moved
+    meta: {
+      title: "Create New Application Type",
+      guard: "auth",
+      roles: ["Admin"], // Only Admin can create new application types
+    },
+  },
 
   // Insurance Underwriter Dashboard
   {
@@ -25,18 +47,6 @@ const routes = [
       title: "Insurance Underwriter Dashboard",
       guard: "auth",
       roles: ["Underwriter"],
-    },
-    
-  },
-  // New Application Page for Underwriter
-  {
-    path: "/underwriter/applications/new",
-    name: "underwriter-new-application",
-    component: () => import("@/pages/underwriter/applications/NewApplication.vue"),
-    meta: {
-      title: "Create New Application Type",
-      guard: "auth",
-      roles: ["Underwriter", "Admin"], // Admin can also create application types
     },
   },
 
@@ -76,7 +86,8 @@ const routes = [
     },
   },
 
-  
+
+
   // Legacy Dashboard (redirects to appropriate dashboard)
   {
     path: "/dashboard",

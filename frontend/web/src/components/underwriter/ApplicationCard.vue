@@ -35,7 +35,7 @@ const props = defineProps({
   description: String,
   value: [String, Number],
   change: String,
-  icon: Object,
+  icon: [Object, Function],
   variant: {
     type: String,
     default: 'default'

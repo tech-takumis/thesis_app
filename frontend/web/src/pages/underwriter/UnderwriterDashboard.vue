@@ -65,7 +65,7 @@
             description="Start underwriting process"
             :icon="FileText"
             variant="primary"
-            @click="navigateTo('/underwriter/applications/new')"
+            @click="navigateTo('/underwriter/applications/pending')"
           />
           <UnderwriterQuickActionButton
             title="Search Policy"
@@ -200,51 +200,12 @@ import AuthenticatedLayout from '../../layouts/AuthenticatedLayout.vue'
 import ApplicationCard from '@/components/underwriter/ApplicationCard.vue'
 import UnderwriterQuickActionButton from '@/components/underwriter/UnderwriterQuickActionButton.vue'
 import { useUserStore } from '@/stores/user'
+import { UNDERWRITER_NAVIGATION } from '@/lib/constants' // Updated import
 
 const store = useUserStore()
 const router = useRouter()
 
-// Navigation for underwriter role
-const underwriterNavigation = [
-  {
-    name: 'Dashboard',
-    href: '/underwriter/dashboard',
-    icon: LayoutDashboard
-  },
-  {
-    name: 'Applications',
-    icon: FileText,
-    children: [
-      { name: 'New Applications', href: '/underwriter/applications/new' },
-      { name: 'Pending Review', href: '/underwriter/applications/pending' },
-      { name: 'Approved Applications', href: '/underwriter/applications/approved' },
-      { name: 'Rejected Applications', href: '/underwriter/applications/rejected' }
-    ]
-  },
-  {
-    name: 'Risk Assessment',
-    icon: Shield,
-    children: [
-      { name: 'Risk Factors', href: '/underwriter/risk/factors' },
-      { name: 'Historical Data', href: '/underwriter/risk/history' },
-      { name: 'Geographic Analysis', href: '/underwriter/risk/geo' }
-    ]
-  },
-  {
-    name: 'Guidelines & Tools',
-    icon: Calculator,
-    children: [
-      { name: 'Eligibility Criteria', href: '/underwriter/guidelines/eligibility' },
-      { name: 'Coverage & Premium', href: '/underwriter/guidelines/coverage' },
-      { name: 'Underwriting Manual', href: '/underwriter/guidelines/manual' }
-    ]
-  },
-  {
-    name: 'Reports',
-    href: '/underwriter/reports',
-    icon: BarChart3
-  }
-]
+const underwriterNavigation = UNDERWRITER_NAVIGATION // Use the imported constant
 
 // Sample data for stats
 const pendingApplications = ref(12)

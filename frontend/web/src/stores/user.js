@@ -343,6 +343,18 @@ export const useUserStore = defineStore("users", {
       return Array.from(allResponsibilities)
     },
 
+    async registerStaff(staffData) {
+      try {
+        console.log("Registering staff with data:", staffData)
+        const response = await axios.post("/staffs", staffData) // Assuming this endpoint
+        console.log("Staff registered successfully:", response.data)
+        return { success: true, data: response.data }
+      } catch (error) {
+        console.error("Error registering staff:", error.response?.data || error.message)
+        return { success: false, error: error.response?.data || error.message }
+      }
+    },
+
     async forgotPassword(form, setStatus, setErrors, processing) {
       processing.value = true
 

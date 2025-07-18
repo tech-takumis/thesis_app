@@ -5,14 +5,14 @@ import com.hashjosh.agripro.insurance.models.InsuranceField;
 import com.hashjosh.agripro.insurance.models.InsuranceType;
 import com.hashjosh.agripro.insurance.validators.FieldValidatorStrategy;
 import com.hashjosh.agripro.insurance.validators.ValidatorFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Service
-public class InsuranceValidator {
+@Component
+public class ApplicationValidator {
 
-    public void  validateApplication(  Map<String, String> fieldValues, InsuranceType insuranceType) throws InvalidApplicationException {
+    public void  validateApplication(Map<String, String> fieldValues, InsuranceType insuranceType) throws InvalidApplicationException {
 
         for(InsuranceField field: insuranceType.getFields()) {
             String fieldName = field.getKey();
