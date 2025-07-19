@@ -1,14 +1,15 @@
-// import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' as getx;
 import '../models/auth_response.dart';
 import '../models/login_request.dart';
 import '../models/registration_request.dart';
 import '../models/registration_response.dart';
+import '../models/application_data.dart';
+import 'storage_service.dart'; // Import StorageService
 
 class ApiService extends getx.GetxService {
   late Dio _dio;
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'http://localhost:8000/api/v1';
 
   static ApiService get to => getx.Get.find();
 
@@ -32,7 +33,7 @@ class ApiService extends getx.GetxService {
       ),
     );
 
-    // Add interceptors for logging
+    // Add interceptors for logging and authentication
     _dio.interceptors.add(
       LogInterceptor(
         requestBody: true,
@@ -40,13 +41,19 @@ class ApiService extends getx.GetxService {
         requestHeader: true,
         responseHeader: false,
         error: true,
-        logPrint: (obj) => print('🌐 API: $obj'),
       ),
     );
 
-    // Add error interceptor
     _dio.interceptors.add(
       InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Add JWT token to requests if available
+          final token = StorageService.to.getToken();
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
         onError: (error, handler) {
           handler.next(error);
         },
@@ -70,7 +77,7 @@ class ApiService extends getx.GetxService {
       } else if (e.type == DioExceptionType.connectionError) {
         return AuthResponse(
           message:
-              'Cannot connect to server. Please check if the server is running on localhost:8000.',
+              'Cannot connect to server. Please ensure your backend is running on $baseUrl.',
           success: false,
         );
       } else if (e.response?.statusCode == 401 ||
@@ -97,10 +104,7 @@ class ApiService extends getx.GetxService {
 
   Future<RegistrationResponse> register(RegistrationRequest request) async {
     try {
-      final response = await _dio.post(
-        '/api/v1/register/farmers',
-        data: request.toJson(),
-      );
+      final response = await _dio.post('/farmer', data: request.toJson());
 
       return RegistrationResponse.fromJson(response.data);
     } on DioException catch (e) {
@@ -117,7 +121,7 @@ class ApiService extends getx.GetxService {
           success: false,
           error: 'Connection Error',
           message:
-              'Cannot connect to server. Please check if the server is running.',
+              'Cannot connect to server. Please ensure your backend is running on $baseUrl.',
         );
       } else if (e.response?.statusCode == 400) {
         final errorData = e.response?.data;
@@ -134,6 +138,59 @@ class ApiService extends getx.GetxService {
         success: false,
         error: 'Unexpected Error',
         message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  // New method to fetch application data
+  Future<ApplicationResponse> fetchApplications() async {
+    try {
+      final response = await _dio.get(
+        '/insurances',
+        options: Options(
+          followRedirects:
+              false, // Temporarily disable redirects to inspect response
+          validateStatus: (status) {
+            return status != null &&
+                status < 500; // Accept 3xx status codes for inspection
+          },
+        ),
+      );
+
+      // Log response details for debugging redirects
+      if (response.statusCode != 200) {
+        if (response.statusCode! >= 300 && response.statusCode! < 400) {
+          throw Exception(
+            'Server attempted a redirect (Status ${response.statusCode}) but missing Location header. Check backend configuration.',
+          );
+        } else if (response.statusCode == 403) {
+          throw Exception(
+            'Access Denied: You are not authorized to view applications. Please log in.',
+          );
+        } else {
+          throw Exception(
+            'Failed to load applications: Server error ${response.statusCode}.',
+          );
+        }
+      }
+
+      return ApplicationResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError) {
+        throw Exception(
+          'Cannot connect to server. Please ensure your backend is running on $baseUrl.',
+        );
+      } else if (e.response?.statusCode == 403) {
+        throw Exception(
+          'Access Denied: You are not authorized to view applications. Please log in.',
+        );
+      }
+      throw Exception(
+        'Failed to load applications: ${e.response?.data['message'] ?? e.message}',
+      );
+    } catch (e) {
+      throw Exception(
+        'An unexpected error occurred while fetching applications: ${e.toString()}',
       );
     }
   }
