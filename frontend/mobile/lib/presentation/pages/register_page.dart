@@ -161,8 +161,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 // Success Message
                 Obx(() {
-                  if (_registrationController.successMessage.isEmpty)
+                  if (_registrationController.successMessage.isEmpty) {
                     return const SizedBox.shrink();
+                  }
 
                   return Container(
                     padding: const EdgeInsets.all(16),
@@ -247,8 +248,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 // Error Message
                 Obx(() {
-                  if (_registrationController.errorMessage.isEmpty)
+                  if (_registrationController.errorMessage.isEmpty) {
                     return const SizedBox.shrink();
+                  }
 
                   return Container(
                     padding: const EdgeInsets.all(16),

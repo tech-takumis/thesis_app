@@ -187,8 +187,9 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Error Message
                 Obx(() {
-                  if (_authController.errorMessage.isEmpty)
+                  if (_authController.errorMessage.isEmpty) {
                     return const SizedBox.shrink();
+                  }
 
                   return Container(
                     padding: const EdgeInsets.all(12),

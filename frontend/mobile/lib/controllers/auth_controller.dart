@@ -66,7 +66,7 @@ class AuthController extends GetxController {
       _isLoggedIn.value = false;
       Get.offAllNamed('/login');
     } catch (e) {
-      print('Logout error: $e');
+      _errorMessage.value = "Logout failed: ${e.toString()}";
     }
   }
 
