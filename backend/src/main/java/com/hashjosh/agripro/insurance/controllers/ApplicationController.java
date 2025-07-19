@@ -27,7 +27,7 @@ public class ApplicationController {
 
     @PostMapping("/insurances/{id}/application:submit")
     public ResponseEntity<String> submitUserInsurance(
-            @PathVariable(required = true) Long id,
+            @PathVariable() Long id,
             @RequestBody InsuranceApplicationRequestDto application) {
         return new ResponseEntity<>(service.submitApplication(application, id), HttpStatus.CREATED);
     }
