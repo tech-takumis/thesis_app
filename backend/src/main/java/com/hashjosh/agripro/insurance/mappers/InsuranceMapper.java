@@ -1,6 +1,5 @@
 package com.hashjosh.agripro.insurance.mappers;
 
-import com.github.slugify.Slugify;
 import com.hashjosh.agripro.insurance.dto.InsuranceRequestDto;
 import com.hashjosh.agripro.insurance.dto.InsuranceResponseDto;
 import com.hashjosh.agripro.insurance.dto.PaginatedResponseDto;

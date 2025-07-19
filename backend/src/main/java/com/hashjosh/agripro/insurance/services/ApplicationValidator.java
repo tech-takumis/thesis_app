@@ -24,10 +24,6 @@ public class ApplicationValidator {
                 throw  new InvalidApplicationException("Coordinate cannot be null in field " + fieldName);
             }
 
-//            System.out.println("Insurance field name:: " + fieldName);
-//            System.out.println("Insurance field value:: " + fieldValue);
-//            System.out.println("Insurance field has Coordinate:: "+ field.isHasCoordinate());
-//            System.out.println("Insurance field  coordinate:: "+ coordinate);
 
             if (field.is_required() && (fieldValue == null || fieldName.isBlank())) {
                 throw new InvalidApplicationException("Missing required field: " + fieldName);
