@@ -43,6 +43,7 @@ public class InsuranceMapper {
 
     public InsuranceResponseDto toInsuranceTypeResponse(InsuranceType insurance) {
         return new InsuranceResponseDto(
+                insurance.getId(),
                 insurance.getDisplayName(), insurance.getDescription(),
                 insurance.isRequiredAiAnalyses(),
                 insurance.getFields()

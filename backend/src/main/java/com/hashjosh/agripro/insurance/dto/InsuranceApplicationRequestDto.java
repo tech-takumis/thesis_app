@@ -1,8 +1,10 @@
 package com.hashjosh.agripro.insurance.dto;
 
-import java.util.Map;
+import com.hashjosh.agripro.insurance.models.InsuranceField;
+
+import java.util.List;
 
 public record InsuranceApplicationRequestDto(
-    Map<String, String> fieldValues
+    List<InsuranceField> values
 ) {
 }

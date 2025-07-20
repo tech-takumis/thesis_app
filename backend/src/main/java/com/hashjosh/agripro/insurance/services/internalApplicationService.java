@@ -1,7 +1,7 @@
 package com.hashjosh.agripro.insurance.services;
 
 import com.hashjosh.agripro.exception.InvalidApplicationException;
-import com.hashjosh.agripro.insurance.models.InsuranceApplication;
+import com.hashjosh.agripro.insurance.models.Application;
 import com.hashjosh.agripro.insurance.models.InsuranceType;
 import com.hashjosh.agripro.insurance.repository.ApplicationInsuranceRepository;
 import com.hashjosh.agripro.insurance.repository.InsuranceTypeRepository;
@@ -37,12 +37,12 @@ public class internalApplicationService {
     }
 
     @Transactional
-    public void saveInsuranceApplication(InsuranceApplication application) {
+    public void saveInsuranceApplication(Application application) {
         applicationInsuranceRepository.save(application);
         applicationInsuranceRepository.flush();
     }
 
-    public List<InsuranceApplication> findAllApplicationByUserId(Long id) {
+    public List<Application> findAllApplicationByUserId(Long id) {
         return applicationInsuranceRepository.findAllByUserId(id);
     }
 

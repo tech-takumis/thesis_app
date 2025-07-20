@@ -5,6 +5,7 @@ import com.hashjosh.agripro.insurance.models.InsuranceField;
 import java.util.List;
 
 public record InsuranceResponseDto(
+        Long id,
         String displayName,
         String description,
         boolean requiredAiAnalyses,
