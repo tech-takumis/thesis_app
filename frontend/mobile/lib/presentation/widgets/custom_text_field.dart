@@ -11,6 +11,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final void Function(String)? onChanged;
+  final bool readOnly; // Added readOnly parameter
 
   const CustomTextField({
     super.key,
@@ -23,6 +24,7 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.inputFormatters,
     this.onChanged,
+    this.readOnly = false, // Default to false
   });
 
   @override
@@ -34,6 +36,7 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       inputFormatters: inputFormatters,
       onChanged: onChanged,
+      readOnly: readOnly, // Use the readOnly parameter
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,

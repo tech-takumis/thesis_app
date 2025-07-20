@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart'; // Import for AlertDialog
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-// import '../data/models/auth_response.dart';
 import '../data/models/login_request.dart';
 import '../data/services/api_service.dart';
 import '../data/services/storage_service.dart';
+import '../data/services/location_service.dart'; // Import LocationService
 
 class AuthController extends GetxController {
   final _isLoading = false.obs;
@@ -17,6 +19,8 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
     _checkLoginStatus();
+    // Initialize LocationService
+    Get.put(LocationService());
   }
 
   void _checkLoginStatus() {
@@ -49,6 +53,9 @@ class AuthController extends GetxController {
 
         _isLoggedIn.value = true;
         Get.offAllNamed('/home');
+
+        // After successful login and navigation, check location
+        _handlePostLoginLocationCheck();
       } else {
         _errorMessage.value = response.message;
       }
@@ -59,6 +66,47 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> _handlePostLoginLocationCheck() async {
+    final locationReady =
+        await LocationService.to.checkAndRequestLocationReadiness();
+    if (!locationReady) {
+      _showLocationPromptDialog();
+    }
+  }
+
+  void _showLocationPromptDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Location Services Required'),
+        content: const Text(
+          'To automatically capture GPS coordinates for your application forms, please enable location services and grant permissions for this app in your device settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+            },
+            child: const Text('Later'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back(); // Close dialog
+              // Attempt to open location settings or app settings
+              bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+              if (!serviceEnabled) {
+                await LocationService.to.openLocationSettings();
+              } else {
+                await LocationService.to.openAppSettings();
+              }
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+      barrierDismissible: false, // User must interact with the dialog
+    );
+  }
+
   Future<void> logout() async {
     try {
       await StorageService.to.removeToken();
@@ -66,7 +114,7 @@ class AuthController extends GetxController {
       _isLoggedIn.value = false;
       Get.offAllNamed('/login');
     } catch (e) {
-      _errorMessage.value = "Logout failed: ${e.toString()}";
+      print('Logout error: $e');
     }
   }
 

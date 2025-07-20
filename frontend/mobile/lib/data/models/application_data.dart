@@ -40,12 +40,14 @@ class ApplicationResponse {
 }
 
 class ApplicationContent {
+  final int id; // Added id field
   final String displayName;
   final String description;
   final bool requiredAiAnalyses;
   final List<ApplicationField> fields;
 
   ApplicationContent({
+    required this.id, // Required in constructor
     required this.displayName,
     required this.description,
     required this.requiredAiAnalyses,
@@ -54,6 +56,7 @@ class ApplicationContent {
 
   factory ApplicationContent.fromJson(Map<String, dynamic> json) {
     return ApplicationContent(
+      id: json['id'], // Parse id from JSON
       displayName: json['displayName'],
       description: json['description'],
       requiredAiAnalyses: json['requiredAiAnalyses'],
@@ -72,7 +75,7 @@ class ApplicationField {
   final String displayName;
   final String note;
   final bool hasCoordinate;
-  final bool required; // Renamed from _required to required
+  final bool required;
 
   ApplicationField({
     required this.id,
@@ -92,7 +95,7 @@ class ApplicationField {
       displayName: json['displayName'],
       note: json['note'],
       hasCoordinate: json['hasCoordinate'],
-      required: json['_required'], // Map _required from JSON
+      required: json['_required'],
     );
   }
 }
