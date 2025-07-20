@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/application_controller.dart';
+import 'application_form_page.dart'; // Import the new form page
 
 class ApplicationPage extends GetView<ApplicationController> {
   const ApplicationPage({super.key});
@@ -73,83 +74,90 @@ class ApplicationPage extends GetView<ApplicationController> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      app.displayName,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+              child: InkWell(
+                // Make the card tappable
+                onTap: () {
+                  Get.to(() => ApplicationFormPage(application: app));
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        app.displayName,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      app.description,
-                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                    ),
-                    const SizedBox(height: 12),
-                    Divider(color: Colors.grey[300]),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Required Fields:',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
+                      const SizedBox(height: 8),
+                      Text(
+                        app.description,
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    ...app.fields.map(
-                      (field) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 12),
+                      Divider(color: Colors.grey[300]),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Required Fields:',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...app.fields.map(
+                        (field) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                size: 8,
+                                color: Colors.grey[600],
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${field.displayName} (${field.fieldType}) - ${field.note}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (app.requiredAiAnalyses) ...[
+                        const SizedBox(height: 12),
+                        Row(
                           children: [
                             Icon(
-                              Icons.circle,
-                              size: 8,
-                              color: Colors.grey[600],
+                              Icons.auto_awesome,
+                              color: Colors.amber[700],
+                              size: 18,
                             ),
                             const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                '${field.displayName} - ${field.note}',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey[600],
-                                ),
+                            Text(
+                              'Requires AI Analysis',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.amber[700],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    if (app.requiredAiAnalyses) ...[
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.auto_awesome,
-                            color: Colors.amber[700],
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Requires AI Analysis',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.amber[700],
-                            ),
-                          ),
-                        ],
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             );

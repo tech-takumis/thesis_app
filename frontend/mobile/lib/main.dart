@@ -9,6 +9,10 @@ import 'presentation/pages/register_page.dart';
 import 'presentation/pages/home_page.dart';
 import 'presentation/pages/application_page.dart'; // Import new page
 
+// Remember to run `flutter pub get` and
+//`flutter pub run build_runner build --delete-conflicting-outputs`
+//after these changes to generate the Hive adapter and fetch new packages.
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
