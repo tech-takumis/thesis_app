@@ -33,5 +33,5 @@ public class InsuranceType {
     private List<InsuranceField> fields;
 
     @OneToMany(mappedBy = "insuranceType")
-    private List<InsuranceApplication> applications;
+    private List<Application> applications;
 }

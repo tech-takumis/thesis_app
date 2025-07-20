@@ -2,16 +2,18 @@ package com.hashjosh.agripro.insurance.services;
 
 import com.hashjosh.agripro.exception.InvalidApplicationException;
 import com.hashjosh.agripro.insurance.dto.ApplicationResponseDto;
-import com.hashjosh.agripro.insurance.dto.InsuranceApplicationRequestDto;
 import com.hashjosh.agripro.insurance.mappers.ApplicationMapper;
-import com.hashjosh.agripro.insurance.models.InsuranceApplication;
+import com.hashjosh.agripro.insurance.models.Application;
 import com.hashjosh.agripro.insurance.models.InsuranceType;
 import com.hashjosh.agripro.user.models.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,39 +22,59 @@ public class ApplicationService {
     private final internalApplicationService internalApplicationService;
     private final ApplicationValidator validator;
     private final ApplicationMapper mapper;
+    private final FileStorageService fileStorageService;
 
-    public ApplicationService(internalApplicationService internalApplicationService, ApplicationValidator validator, ApplicationMapper mapper) {
+    public ApplicationService(internalApplicationService internalApplicationService, ApplicationValidator validator, ApplicationMapper mapper, FileStorageService fileStorageService) {
         this.internalApplicationService = internalApplicationService;
         this.validator = validator;
         this.mapper = mapper;
+        this.fileStorageService = fileStorageService;
     }
 
-    public String submitApplication(InsuranceApplicationRequestDto dto, Long insuranceTypeId) {
-        try{
+    public String submitApplication(Map<String, String> fieldValues, List<MultipartFile> files, Long insuranceTypeId) {
+        try {
             InsuranceType insuranceType = internalApplicationService.findInsuranceTypeById(insuranceTypeId);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-            if (authentication == null || authentication.getPrincipal() == null){
+            if (auth == null || auth.getPrincipal() == null) {
                 throw new InvalidApplicationException("Invalid user session");
             }
 
-            User user = internalApplicationService.getAuthenticatedUser(authentication.getName());
+            User user = internalApplicationService.getAuthenticatedUser(auth.getName());
 
+            // Process files first and map them
+            Map<String, String> fileFieldMapping = new HashMap<>();
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    String originalName = file.getOriginalFilename();
+                    String storedPath = fileStorageService.saveFile(file);
+                    fileFieldMapping.put(originalName, storedPath); // map filename → storage path
+                }
+            }
 
-            System.out.println("User logged in: " + user);
-            validator.validateApplication(dto.fieldValues(), insuranceType);
-            InsuranceApplication application = mapper.toInsuranceApplication(dto, insuranceType, user);
+            // Replace string values in fieldValues that refer to files
+            for (Map.Entry<String, String> entry : fieldValues.entrySet()) {
+                String value = entry.getValue();
+                if (fileFieldMapping.containsKey(value)) {
+                    entry.setValue(fileFieldMapping.get(value)); // replace with actual path
+                }
+            }
 
-            // Save the insurance application
+            System.out.println("Field Values:: "+ fieldValues);
+
+            validator.validateApplication(fieldValues, insuranceType);
+
+            Application application = mapper.toInsuranceApplication(fieldValues, insuranceType, user);
             internalApplicationService.saveInsuranceApplication(application);
 
             return "Insurance application submitted successfully";
         } catch (Exception e) {
-            System.out.printf("Insurance application submitted failed: %s%n", e.getMessage());
-            throw new RuntimeException(e);
+            System.err.printf("Application failed: %s%n", e.getMessage());
+            throw new RuntimeException("Application submission failed", e);
         }
     }
+
+
 
     // This find all application of the authenticated use
     public List<ApplicationResponseDto> findApplication() {
@@ -60,7 +82,7 @@ public class ApplicationService {
 
         User  user = internalApplicationService.getAuthenticatedUser(authentication.getName());
 
-        List<InsuranceApplication> applications = internalApplicationService.findAllApplicationByUserId(user.getId());
+        List<Application> applications = internalApplicationService.findAllApplicationByUserId(user.getId());
 
         return applications.stream().map(mapper::toApplicationResponse).collect(Collectors.toList());
     }

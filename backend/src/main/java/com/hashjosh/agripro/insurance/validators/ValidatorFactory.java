@@ -17,9 +17,11 @@ public class ValidatorFactory {
 
     public static FieldValidatorStrategy getValidator(Datatype datatype) {
         FieldValidatorStrategy validator = validatorMap.get(datatype);
-        if(validator == null) {
+        if (validator == null) {
             throw new InvalidApplicationException("Unsupported datatype: " + datatype);
         }
         return validator;
     }
+
 }
+

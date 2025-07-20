@@ -2,7 +2,7 @@ package com.hashjosh.agripro.user.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import com.hashjosh.agripro.insurance.models.InsuranceApplication;
+import com.hashjosh.agripro.insurance.models.Application;
 import com.hashjosh.agripro.role.Role;
 
 import jakarta.persistence.*;
@@ -56,5 +56,5 @@ public class User {
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
     @JsonManagedReference("user-applications")
-    private List<InsuranceApplication> applications;
+    private List<Application> applications;
 }
