@@ -1,0 +1,49 @@
+services:
+  postgres:
+    container_name: agripro_psql
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: agripro_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: agripro
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - agripro_net
+
+  prometheus:
+    container_name: agripro_prometheus
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - agripro_net
+
+  grafana:
+    container_name: agripro_grafana
+    image: grafana/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWRD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - agripro_net
+
+
+volumes:
+  pg_data:
+  promethous_data:
+  grafana_data:
+
+
+networks:
+  agripro_net:
+    driver: bridge

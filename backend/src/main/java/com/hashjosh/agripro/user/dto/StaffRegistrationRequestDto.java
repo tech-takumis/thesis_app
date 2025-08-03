@@ -1,5 +1,6 @@
 package com.hashjosh.agripro.user.dto;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 
 import java.util.Set;
@@ -10,6 +11,7 @@ public record StaffRegistrationRequestDto(
         String fullname,
         @Email(message = "Email should be a valid!")
         @NotNull(message = "Email is required!")
+        @Column(unique = true)
         String email,
 
         @NotNull(message = "Gender is required")
@@ -27,7 +29,7 @@ public record StaffRegistrationRequestDto(
         String department,
         @NotBlank(message = "Location is required!")
         String location,
-        String role
+        Long roleId
 
 ) {
 }

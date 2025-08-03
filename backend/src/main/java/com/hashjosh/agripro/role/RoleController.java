@@ -3,13 +3,13 @@ package com.hashjosh.agripro.role;
 import com.hashjosh.agripro.role.dtos.RoleCreationResponseDto;
 import com.hashjosh.agripro.role.dtos.RoleRequestDto;
 import com.hashjosh.agripro.role.dtos.RoleResponseDto;
+import com.hashjosh.agripro.role.exceptions.RoleNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.relation.RoleNotFoundException;
 import java.util.List;
 
 @RestController
@@ -30,18 +30,14 @@ public class RoleController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getRoles(
-            @RequestParam(required = false) String q
-    ) throws RoleNotFoundException {
-        if (q != null) {
-            RoleResponseDto role = service.findRole(q);
+    public ResponseEntity<List<RoleResponseDto>> getRoles(
+    ){
+        return new ResponseEntity<>(service.getAllRoles(), HttpStatus.OK);
+    }
 
-            return new ResponseEntity<>(role, HttpStatus.OK);
-        }
-
-        List<RoleResponseDto> roles  = service.findAll();
-
-        return new ResponseEntity<>(roles, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<RoleResponseDto> findRole(@PathVariable Long id){
+        return new ResponseEntity<>(service.findRoleById(id),HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

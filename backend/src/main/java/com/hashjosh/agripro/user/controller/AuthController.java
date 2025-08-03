@@ -1,11 +1,12 @@
 package com.hashjosh.agripro.user.controller;
 
 import com.hashjosh.agripro.config.CustomUserDetails;
+import com.hashjosh.agripro.global.dto.AuthenticatedUserDto;
 import com.hashjosh.agripro.user.dto.LoginRequestDTO;
 import com.hashjosh.agripro.user.models.User;
-import com.hashjosh.agripro.authority.AuthorityRepository;
 
 import com.hashjosh.agripro.user.services.AuthService;
+import com.hashjosh.agripro.user.services.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,10 +28,12 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthService authService;
+    private final UserService userService;
 
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     @PostMapping("/web/login")
@@ -111,16 +114,7 @@ public class AuthController {
     }
 
     @GetMapping("/auth/users")
-    public ResponseEntity<?> user(HttpServletRequest request) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || authentication.getPrincipal() == null){
-            return ResponseEntity.status(404).body(Map.of("message","Not Authenticated"));
-        }
-
-        String username = authentication.getName();
-
-        return ResponseEntity.ok(authService.authenticatedUser(username));
+    public ResponseEntity<AuthenticatedUserDto> user(HttpServletRequest request) {
+        return ResponseEntity.ok(userService.getAuthenticateUser());
     }
 }

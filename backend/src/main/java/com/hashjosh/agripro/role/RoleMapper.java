@@ -22,12 +22,11 @@ public class RoleMapper {
 
     public RoleResponseDto toRoleResponse(Role role) {
             return new RoleResponseDto(
-                    role.getName(), role.getAuthorities().stream().map(
-                    Authority::getName
-            ).collect(Collectors.toSet()), role.getUsers().stream().map(
-                    User::getUsername
-            ).collect(Collectors.toSet())
-            );
+                    role.getId(),
+                    role.getName(),
+                    role.getAuthorities().stream().map(
+                        Authority::getName
+                     ).collect(Collectors.toSet()));
     }
 
     public Role updateRole(Long id, RoleRequestDto dto) {

@@ -32,7 +32,7 @@ public class FarmerProfile {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
-    @JsonBackReference("user-farmer")
+//    @JsonBackReference("user-farmer")
     private User user;
 
 }
