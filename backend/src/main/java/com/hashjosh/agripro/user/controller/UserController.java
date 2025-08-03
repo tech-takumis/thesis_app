@@ -1,11 +1,9 @@
 package com.hashjosh.agripro.user.controller;
 
+import com.hashjosh.agripro.role.exceptions.RoleNotFoundException;
 import com.hashjosh.agripro.user.dto.FarmerRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
-
 import com.hashjosh.agripro.user.dto.StaffResponseDto;
-
-import com.hashjosh.agripro.user.models.User;
 import com.hashjosh.agripro.user.services.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,10 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.relation.RoleNotFoundException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -32,7 +28,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/staffs")
     public ResponseEntity<Map<String,String>> registerStaff(
             @RequestBody @Valid  StaffRegistrationRequestDto dto
@@ -45,7 +41,7 @@ public class UserController {
     @PostMapping("/farmers")
     public ResponseEntity<Map<String,String>> registerFarmer(
             @RequestBody @Valid FarmerRegistrationRequestDto dto
-    ) throws MessagingException{
+    ) throws MessagingException {
 
         userService.registerFarmer(dto);
        return  ResponseEntity.status(HttpStatus.CREATED)
@@ -67,14 +63,13 @@ public class UserController {
         return new ResponseEntity<>(userService.updateStaffRole(roleId, id), HttpStatus.ACCEPTED);
     }
 
-
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUser(
             @PathVariable int id
     ){
         try{
-            userService.deleteUser(id);
+            userService.hardDelete(id);
             return ResponseEntity.noContent().build();
         }catch(EmptyResultDataAccessException ex){
             throw new EntityNotFoundException("User with id " + id + " not found");

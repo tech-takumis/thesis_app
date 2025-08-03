@@ -2,15 +2,15 @@ package com.hashjosh.agripro.role;
 
 import com.hashjosh.agripro.authority.Authority;
 import com.hashjosh.agripro.authority.AuthorityRepository;
-import com.hashjosh.agripro.exception.UserRoleNotFoundException;
 import com.hashjosh.agripro.role.dtos.RoleCreationResponseDto;
 import com.hashjosh.agripro.role.dtos.RoleRequestDto;
 import com.hashjosh.agripro.role.dtos.RoleResponseDto;
+import com.hashjosh.agripro.role.exceptions.RoleNotFoundException;
 import com.hashjosh.agripro.user.models.User;
 import com.hashjosh.agripro.user.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.RoleNotFoundException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,13 +47,6 @@ public class RoleService {
         return mapper.toRoleCreationResponse(role);
     }
 
-    public RoleResponseDto findRole(String q) throws RoleNotFoundException {
-
-        Role role = roleRepository.findByName(q)
-            .orElseThrow(() -> new RoleNotFoundException("Role name: "+ q + "not found"));
-
-        return mapper.toRoleResponse(role);
-    }
 
     public List<RoleResponseDto> findAll() {
         return roleRepository.findAll().stream()
@@ -61,20 +54,27 @@ public class RoleService {
                     .collect(Collectors.toList());
     }
 
-    public RoleResponseDto update(Long id, RoleRequestDto dto) throws RoleNotFoundException {
+    public RoleResponseDto update(Long id, RoleRequestDto dto){
 
         roleRepository.findById(id)
-                .orElseThrow(() -> new RoleNotFoundException("Role id::" + id + "does not exist!"));
-
+                .orElseThrow(() -> new RoleNotFoundException(
+                        "Role not found",
+                        HttpStatus.NOT_FOUND.value(),
+                        String.format("Role id %d not found.", id)
+                ));
 
         Role role = mapper.updateRole(id, dto);
         return mapper.toRoleResponse(role);
     }
 
-    public void delete(Long id) {
+    public void delete(Long id){
 
         Role role = roleRepository.findById(id)
-                        .orElseThrow(() -> new UserRoleNotFoundException("Role id::" + id + "not found!"));
+                        .orElseThrow(() -> new RoleNotFoundException(
+                                "Role not found",
+                                HttpStatus.NOT_FOUND.value(),
+                                String.format("Role id %d not found.", id)
+                        ));
 
         List<User> users = userRepository.findAll();
 
@@ -114,5 +114,22 @@ public class RoleService {
     }
 
 
+    public RoleResponseDto findRoleById(Long id) {
 
+        Role role = roleRepository.findById(id).orElseThrow(
+                () -> new RoleNotFoundException(
+                        "Role not found",
+                        HttpStatus.NOT_FOUND.value(),
+                        String.format("Role id %d not found.", id)
+                )
+        );
+
+        return mapper.toRoleResponse(role);
+    }
+
+    public List<RoleResponseDto> getAllRoles() {
+        return roleRepository.findAll()
+                .stream().map(mapper::toRoleResponse)
+                .collect(Collectors.toList());
+    }
 }

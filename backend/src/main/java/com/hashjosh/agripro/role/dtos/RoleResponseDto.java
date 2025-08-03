@@ -3,8 +3,9 @@ package com.hashjosh.agripro.role.dtos;
 import java.util.Set;
 
 public record RoleResponseDto(
+        Long id,
         String name,
-        Set<String> authorities,
-        Set<String> users
+        Set<String> authorities
+
 ) {
 }

@@ -19,6 +19,6 @@ public class StaffProfile {
     private String location;
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
-    @JsonBackReference("user-staff")
+//    @JsonBackReference("user-staff")
     private User user;
 }

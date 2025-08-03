@@ -1,7 +1,9 @@
 package com.hashjosh.agripro.role;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.hashjosh.agripro.authority.Authority;
 import com.hashjosh.agripro.user.models.User;
 import jakarta.persistence.*;
@@ -16,6 +18,11 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "roles")
+@JsonIdentityInfo(
+       generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+
+)
 public class Role {
 
     @Id

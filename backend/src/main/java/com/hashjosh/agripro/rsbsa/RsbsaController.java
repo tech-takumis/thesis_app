@@ -19,7 +19,6 @@ public class RsbsaController {
         this.rsbsaService = rsbsaService;
     }
 
-
     @PostMapping()
     public ResponseEntity<RsbsaResponseDto> save(@RequestBody RsbsaRequestDto dto){
         return new ResponseEntity<>(rsbsaService.save(dto),HttpStatus.CREATED);
