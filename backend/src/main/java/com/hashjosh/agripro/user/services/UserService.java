@@ -1,6 +1,6 @@
 package com.hashjosh.agripro.user.services;
 
-import com.hashjosh.agripro.hpj_insurance.exception.InsuranceApplicationException;
+import com.hashjosh.agripro.insurance.exception.InsuranceApplicationException;
 import com.hashjosh.agripro.role.exceptions.RoleNotFoundException;
 import com.hashjosh.agripro.global.dto.AuthenticatedUserDto;
 import com.hashjosh.agripro.user.dto.FarmerRegistrationRequestDto;
@@ -27,20 +27,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper mapper;
-    private final UserEmailService service;
     private final InternalUserService internalUserService;
     public UserService(UserRepository userRepository,
                        UserMapper mapper1,
                        UserEmailService service, InternalUserService internalUserService) {
         this.userRepository = userRepository;
         this.mapper = mapper1;
-        this.service = service;
         this.internalUserService = internalUserService;
     }
 
-
-    @Async
-    public void registerStaff(StaffRegistrationRequestDto dto) throws MessagingException {
+    public User registerStaff(StaffRegistrationRequestDto dto) throws MessagingException {
 
         if(userRepository.findByEmail(dto.email()).isPresent()){
             throw new UserAlreadyExistException(
@@ -49,8 +45,7 @@ public class UserService {
                     "User already exist"
             );
         }
-        User user = internalUserService.registerStaff(dto);
-        service.sendStaffRegistrationMail(user);
+        return internalUserService.registerStaff(dto);
     }
 
     public AuthenticatedUserDto getAuthenticateUser(){
@@ -73,11 +68,8 @@ public class UserService {
 
     }
 
-    @Async
-    public void registerFarmer(FarmerRegistrationRequestDto dto) throws MessagingException {
-
-        User user = internalUserService.registerFarmer(dto);
-        service.sendFarmerRegistrationMail(user);
+    public User registerFarmer(FarmerRegistrationRequestDto dto) throws MessagingException {
+        return internalUserService.registerFarmer(dto);
     }
 
     public void softDelete(int id){

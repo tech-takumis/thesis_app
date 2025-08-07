@@ -19,15 +19,18 @@ import java.util.stream.Collectors;
 public class RoleService {
 
     private final RoleRepository roleRepository;
-    private final AuthorityRepository authorityRepository;
     private final UserRepository userRepository;
+    private final AuthorityRepository authorityRepository;
+    private final Utils utils;
 
     private  final RoleMapper mapper;
 
-    public RoleService(RoleRepository roleRepository, AuthorityRepository authorityRepository, UserRepository userRepository, RoleMapper mapper) {
+    public RoleService(RoleRepository roleRepository,
+                       UserRepository userRepository, AuthorityRepository authorityRepository, Utils utils, RoleMapper mapper) {
         this.roleRepository = roleRepository;
-        this.authorityRepository = authorityRepository;
         this.userRepository = userRepository;
+        this.authorityRepository = authorityRepository;
+        this.utils = utils;
         this.mapper = mapper;
     }
 
@@ -35,11 +38,17 @@ public class RoleService {
 
         // Get or create the authorities if does not exist in the database
         // to avoid redundant value of authority in the database
-        Set<Authority> authority = getAuthorities(roleRequestDto.authorities());
+        List<Authority> authority = authorityRepository.findAllById(roleRequestDto.permissionIds());
 
         // Same as the role we check first the database if the role already exist to avoid redundant
         // insertion of role in the database
-        Role role = getOrCreateRole(roleRequestDto);
+        Role role = roleRepository.findByName(roleRequestDto.name())
+                        .orElseGet(() -> roleRepository.save(
+                                Role.builder()
+                                        .name(roleRequestDto.name())
+                                        .authorities(authority)
+                                        .build()
+                        ));
 
         role.setAuthorities(authority);
         role = roleRepository.save(role);
@@ -62,6 +71,7 @@ public class RoleService {
                         HttpStatus.NOT_FOUND.value(),
                         String.format("Role id %d not found.", id)
                 ));
+
 
         Role role = mapper.updateRole(id, dto);
         return mapper.toRoleResponse(role);
@@ -87,32 +97,6 @@ public class RoleService {
     }
 
 
-    // private function
-    private Set<Authority> getAuthorities(Set<Authority> authorities) {
-        return authorities.stream().map(
-                this::getOrCreateAuthority
-        ).collect(Collectors.toSet());
-    }
-    private  Authority getOrCreateAuthority(Authority authority) {
-        return authorityRepository.findByName(authority.getName()).orElseGet(
-                () -> authorityRepository.save(
-                        Authority.builder()
-                                .name(authority.getName())
-                                .build()
-                ));
-    }
-
-    private Role getOrCreateRole(RoleRequestDto role) {
-        return roleRepository.findByName(role.name()).orElseGet(
-                () -> roleRepository.save(
-                        Role.builder()
-                                .name(role.name())
-                                .authorities(getAuthorities(role.authorities()))
-                                .build()
-                )
-        );
-    }
-
 
     public RoleResponseDto findRoleById(Long id) {
 
@@ -131,5 +115,12 @@ public class RoleService {
         return roleRepository.findAll()
                 .stream().map(mapper::toRoleResponse)
                 .collect(Collectors.toList());
+    }
+
+    public List<RoleResponseDto> saveAll(List<RoleRequestDto> roleRequestDtos) {
+
+        List<Role> roles = mapper.toRoleList(roleRequestDtos);
+        List<Role> savedRoles = roleRepository.saveAll(roles);
+        return savedRoles.stream().map(mapper::toRoleResponse).collect(Collectors.toList());
     }
 }

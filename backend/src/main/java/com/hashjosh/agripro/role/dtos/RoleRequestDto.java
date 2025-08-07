@@ -8,6 +8,6 @@ import java.util.Set;
 public record RoleRequestDto(
         @NotBlank(message = "Role name is required!")
         String name,
-        Set<Authority> authorities
+        Set<Long> permissionIds
  ) {
 }

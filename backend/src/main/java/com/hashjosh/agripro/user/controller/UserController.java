@@ -4,6 +4,8 @@ import com.hashjosh.agripro.role.exceptions.RoleNotFoundException;
 import com.hashjosh.agripro.user.dto.FarmerRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffRegistrationRequestDto;
 import com.hashjosh.agripro.user.dto.StaffResponseDto;
+import com.hashjosh.agripro.user.models.User;
+import com.hashjosh.agripro.user.services.UserEmailService;
 import com.hashjosh.agripro.user.services.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,9 +24,11 @@ import java.util.concurrent.CompletableFuture;
 public class UserController {
 
     private final UserService  userService;
+    private final UserEmailService emailService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserEmailService emailService) {
         this.userService = userService;
+        this.emailService = emailService;
     }
 
 
@@ -33,7 +37,10 @@ public class UserController {
     public ResponseEntity<Map<String,String>> registerStaff(
             @RequestBody @Valid  StaffRegistrationRequestDto dto
     ) throws MessagingException {
-        userService.registerStaff(dto);
+        // Save the user to the database
+        User user = userService.registerStaff(dto);
+        // Send the email to the user
+        emailService.sendStaffRegistrationMail(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "Staff registered successfully"));
     }
@@ -42,8 +49,8 @@ public class UserController {
     public ResponseEntity<Map<String,String>> registerFarmer(
             @RequestBody @Valid FarmerRegistrationRequestDto dto
     ) throws MessagingException {
-
-        userService.registerFarmer(dto);
+        User user = userService.registerFarmer(dto);
+        emailService.sendFarmerRegistrationMail(user);
        return  ResponseEntity.status(HttpStatus.CREATED)
                        .body(Map.of(
                                "message", "Farmer created successfully!"

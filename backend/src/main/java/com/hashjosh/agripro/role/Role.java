@@ -9,6 +9,7 @@ import com.hashjosh.agripro.user.models.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -39,5 +40,5 @@ public class Role {
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id")
     )
-    private Set<Authority> authorities;
+    private List<Authority> authorities;
 }

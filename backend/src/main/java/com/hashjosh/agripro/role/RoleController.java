@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/roles")
+@RequestMapping("/api/v1")
 public class RoleController {
 
     private final RoleService service;
@@ -22,25 +22,32 @@ public class RoleController {
         this.service = service;
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/role")
     public ResponseEntity<RoleCreationResponseDto> create(
             @RequestBody RoleRequestDto roleRequestDto
     ){
         return new ResponseEntity<>(service.createRole(roleRequestDto), HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @PostMapping("/roles")
+    public ResponseEntity<List<RoleResponseDto>> createRoles(
+            @RequestBody List<RoleRequestDto> roleRequestDtos
+    ){
+        return new ResponseEntity<>(service.saveAll(roleRequestDtos),HttpStatus.CREATED);
+    }
+
+    @GetMapping("/roles")
     public ResponseEntity<List<RoleResponseDto>> getRoles(
     ){
         return new ResponseEntity<>(service.getAllRoles(), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/role/{id}")
     public ResponseEntity<RoleResponseDto> findRole(@PathVariable Long id){
         return new ResponseEntity<>(service.findRoleById(id),HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/role/{id}")
     public ResponseEntity<RoleResponseDto> update(
             @PathVariable Long id, @RequestBody RoleRequestDto dto
     ) throws RoleNotFoundException {
@@ -48,7 +55,7 @@ public class RoleController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/role/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) throws RoleNotFoundException {
         service.delete(id);
         return ResponseEntity.noContent().build();
