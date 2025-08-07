@@ -10,13 +10,6 @@
           <h1 class="text-2xl font-bold text-gray-900">Register New Staff</h1>
           <p class="text-gray-600">Create a new user account for PCIC staff members</p>
         </div>
-        <router-link 
-          to="/admin/dashboard"
-          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-        >
-          <ArrowLeft class="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </router-link>
       </div>
     </template>
 
@@ -156,14 +149,14 @@
                 Role <span class="text-red-500">*</span>
               </label>
               <select
-                v-model="form.role"
+                v-model="form.roleId"
                 id="role"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="">Select Role</option>
-                <option v-for="roleOption in staffRoles" :key="roleOption" :value="roleOption">
-                  {{ roleOption.replace(/_/g, ' ') }}
+                <option v-for="roleOption in rolePermission?.roles" :key="roleOption?.id" :value="roleOption.id">
+                  {{ roleOption.name }}
                 </option>
               </select>
             </div>
@@ -194,18 +187,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref } from 'vue'
 import { ArrowLeft, Loader2 } from 'lucide-vue-next'
 import AuthenticatedLayout from '../../../layouts/AuthenticatedLayout.vue'
 import { useUserStore } from '@/stores/user'
-import { ADMIN_NAVIGATION, STAFF_ROLES } from '@/lib/constants'
+import { ADMIN_NAVIGATION } from '@/lib/constants'
+import { useRolePermissionStore } from '../../../stores/rolePermission'
 
-const router = useRouter()
 const userStore = useUserStore()
+const rolePermission = useRolePermissionStore()
 
 const adminNavigation = ADMIN_NAVIGATION
-const staffRoles = STAFF_ROLES
 
 const form = ref({
   fullname: '',
@@ -217,7 +209,7 @@ const form = ref({
   position: '',
   department: '',
   location: '',
-  role: '',
+  roleId: '',
 })
 
 const processing = ref(false)
@@ -250,4 +242,8 @@ const resetForm = () => {
     role: '',
   }
 }
+
+onMounted(() => {
+  rolePermission.fetchRoles()
+})
 </script>
