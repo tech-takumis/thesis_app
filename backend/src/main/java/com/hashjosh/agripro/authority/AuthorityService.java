@@ -1,5 +1,6 @@
 package com.hashjosh.agripro.authority;
 
+import com.hashjosh.agripro.authority.dto.AuthorityDto;
 import com.hashjosh.agripro.authority.dto.AuthorityResponseDto;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,16 @@ public class AuthorityService {
         this.authoritymapper = authoritymapper;
     }
 
+    public List<AuthorityResponseDto> saveAuthorities(List<AuthorityDto> authorities) {
+
+        List<Authority> authorityList = authoritymapper.toAuthorityList(authorities);
+        List<Authority> savedAuthorities =  authorityRepository.saveAll(authorityList);
+
+        return savedAuthorities.stream().map(
+                authoritymapper::toAuthorityResponseDto
+        ).collect(Collectors.toList());
+    }
+
     public List<AuthorityResponseDto> findAll() {
         return authorityRepository.findAll().stream().map(
                 authoritymapper::toAuthorityResponseDto
@@ -27,4 +38,5 @@ public class AuthorityService {
     public void delete(Long id) {
         authorityRepository.deleteById(id);
     }
+
 }

@@ -1,5 +1,6 @@
 package com.hashjosh.agripro.authority;
 
+import com.hashjosh.agripro.authority.dto.AuthorityDto;
 import com.hashjosh.agripro.authority.dto.AuthorityResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,13 @@ public class AuthorityController {
 
     @GetMapping
     public ResponseEntity<List<AuthorityResponseDto>> getAuthorities() {
-        return new ResponseEntity<>(service.findAll(), HttpStatus.FOUND);
+        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<List<AuthorityResponseDto>> createAuthorities(
+            @RequestBody List<AuthorityDto> authorities) {
+        return new ResponseEntity<>(service.saveAuthorities(authorities),HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

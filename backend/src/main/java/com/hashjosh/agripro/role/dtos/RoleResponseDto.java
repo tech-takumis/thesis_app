@@ -6,6 +6,5 @@ public record RoleResponseDto(
         Long id,
         String name,
         Set<String> authorities
-
 ) {
 }

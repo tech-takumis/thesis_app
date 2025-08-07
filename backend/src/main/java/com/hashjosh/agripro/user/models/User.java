@@ -2,7 +2,7 @@ package com.hashjosh.agripro.user.models;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.hashjosh.agripro.hpj_insurance.model.InsuranceApplication;
+import com.hashjosh.agripro.insurance.model.InsuranceApplication;
 import com.hashjosh.agripro.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
