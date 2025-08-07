@@ -30,11 +30,33 @@ const routes = [
   {
     path: "/admin/applications/new",
     name: "admin-new-application",
-    component: () => import("@/pages/admin/applications/NewApplication.vue"), // Component moved
+    component: () => import("@/pages/admin/applications/NewApplication.vue"),
     meta: {
       title: "Create New Application Type",
       guard: "auth",
-      roles: ["Admin"], // Only Admin can create new application types
+      roles: ["Admin"],
+    },
+  },
+  // View All Applications Page for Admin
+  {
+    path: "/admin/applications/all",
+    name: "admin-view-applications",
+    component: () => import("@/pages/admin/applications/ViewApplications.vue"),
+    meta: {
+      title: "All Application Types",
+      guard: "auth",
+      roles: ["Admin"],
+    },
+  },
+  // Roles & Permissions Page for Admin
+  {
+    path: "/admin/roles",
+    name: "admin-roles-permissions",
+    component: () => import("@/pages/admin/roles/RolesPermissions.vue"),
+    meta: {
+      title: "Roles & Permissions",
+      guard: "auth",
+      roles: ["Admin"],
     },
   },
 
@@ -45,6 +67,17 @@ const routes = [
     component: () => import("@/pages/underwriter/UnderwriterDashboard.vue"),
     meta: {
       title: "Insurance Underwriter Dashboard",
+      guard: "auth",
+      roles: ["Underwriter"],
+    },
+  },
+
+  {
+    path: "/underwriter/applications/all",
+    name: "all-application",
+    component: () => import("@/pages/underwriter/applications/ViewApplications.vue"),
+    meta: {
+      title: "All Application",
       guard: "auth",
       roles: ["Underwriter"],
     },
@@ -85,7 +118,6 @@ const routes = [
       // No specific roles - accessible to any authenticated user
     },
   },
-
 
 
   // Legacy Dashboard (redirects to appropriate dashboard)
@@ -151,15 +183,6 @@ router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some((route) => route.meta.guard === "auth")
   const requiresGuest = to.matched.some((route) => route.meta.guard === "guest")
   const requiredRoles = to.meta.roles
-
-  console.log(
-    "Router guard - Route:",
-    to.name,
-    "Requires auth:",
-    requiresAuth,
-    "User authenticated:",
-    store.isAuthenticate,
-  )
 
   // Only fetch user data if route requires auth and user is not authenticated
   if (requiresAuth && !store.isAuthenticate) {

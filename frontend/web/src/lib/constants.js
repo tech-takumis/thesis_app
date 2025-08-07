@@ -23,7 +23,7 @@ export const UNDERWRITER_NAVIGATION = [
       { name: "Pending Review", href: "/underwriter/applications/pending" },
       { name: "Approved Applications", href: "/underwriter/applications/approved" },
       { name: "Rejected Applications", href: "/underwriter/applications/rejected" },
-      { name: "All Applications", href: "/underwriter/applications/all" }, // Added for completeness
+      { name: "All Applications", href: "/underwriter/applications/all" },
     ],
   },
   {
@@ -64,7 +64,7 @@ export const ADMIN_NAVIGATION = [
     children: [
       { name: "Register Staff", href: "/admin/staff/register" },
       { name: "Manage Staff Accounts", href: "/admin/staff/manage" },
-      { name: "Roles & Permissions", href: "/admin/staff/roles" },
+      { name: "Roles & Permissions", href: "/admin/roles" },
     ],
   },
   {
@@ -72,8 +72,8 @@ export const ADMIN_NAVIGATION = [
     icon: ClipboardList,
     children: [
       { name: "Create Application Type", href: "/admin/applications/new" },
+      { name: "View All Applications", href: "/admin/applications/all" }, // Added this line
       { name: "Manage Application Types", href: "/admin/applications/manage" },
-      { name: "View All Applications", href: "/admin/applications/all" },
     ],
   },
   {
@@ -97,7 +97,5 @@ export const ADMIN_NAVIGATION = [
 ]
 
 // Data types for application fields
-export const DATA_TYPES = ["Text", "Number", "Timestamp", "Boolean", "File"]
+export const DATA_TYPES = ["TEXT", "NUMBER", "DATE", "BOOLEAN", "FILE", "ENUM", "GEOLOCATION"]
 
-// Available roles for staff registration
-export const STAFF_ROLES = ["Teller", "Admin", "Claims_Processor", "Underwriter"]
